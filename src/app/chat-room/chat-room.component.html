@@ -1,0 +1,14 @@
+<p>chat-room works!</p>
+<input [(ngModel)]="message.sender" placeholder="User Name" />
+<div class="chat-container">
+    <div class="messages">
+        <div *ngFor="let msg of messages">
+            <div [style.text-align]="msg.sender == message.sender ? 'right' : 'left'"> <strong>{{ msg.sender }}:</strong> {{ msg.content }}</div>
+        </div>
+    </div>
+    <ng-container *ngIf="message?.sender">
+        <input [(ngModel)]="message.content" placeholder="Type a message..." />
+        <button (click)="sendMessage()">Send</button>
+    </ng-container>
+    
+</div>
