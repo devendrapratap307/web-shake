@@ -21,12 +21,20 @@ export class WebSocketService {
    * @param username Optional username for the chat.
    */
   connect(username?: string): void {
+    // const token = localStorage.getItem('token');  // Assuming the JWT token is stored in localStorage
+    // if (!token) {
+    //   console.error('No JWT token found. Cannot connect.');
+    //   return;  // Prevent connection if token is missing
+    // }
     const socket = new SockJS('http://localhost:7076/ws');
 
     this.stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000, // Retry connection after delay if disconnected
       debug: (str) => console.log(`[STOMP DEBUG]: ${str}`),
+      // connectHeaders: {
+      //   Authorization: `Bearer ${token}`,  // Pass JWT token in headers for WebSocket connection
+      // },
     });
 
     // Handle successful connection

@@ -1,4 +1,4 @@
-<p>chat-room works!</p>
+<!-- <p>chat-room works!</p>
 <input [(ngModel)]="message.sender" placeholder="User Name" />
 <div class="chat-container">
     <div class="messages">
@@ -11,4 +11,33 @@
         <button (click)="sendMessage()">Send</button>
     </ng-container>
     
-</div>
+</div> -->
+
+
+<div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+      Chat Shake <input [(ngModel)]="message.sender" placeholder="User Name" />
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-messages">
+        <ng-container *ngFor="let msg of messages">
+            
+              <!-- <div class="message-content">{{ msg.content }}</div> -->
+            <div [class]="msg.sender == message.sender ? 'message sent' : 'message'">
+                <div class="message-header">
+                <span class="username">{{ msg.sender }}</span>
+                <span class="timestamp">{{ msg?.time }}</span>
+            </div>
+                {{ msg.content }}</div>
+        </ng-container>
+      
+    </div>
+
+    <!-- Chat Input Area -->
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()"/>
+      <button class="send-button" (click)="sendMessage()">Send</button>
+    </div>
+  </div>
