@@ -3,6 +3,7 @@ import { WebSocketService } from '../services/web-socket.service';
 import { ChatApiService } from '../services/chat-api.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { Message } from '../models/message';
 
 @Component({
   selector: 'app-chat-room',
@@ -12,7 +13,7 @@ import { Router } from '@angular/router';
 export class ChatRoomComponent {
   @ViewChild('chatWindow') chatWindow!: ElementRef; 
   messages: any[] = [];
-  message = { sender: '', content: '' };
+  message: Message = new Message();
   isConnected: boolean = false;
   connectingMessage: string = '';
 
@@ -25,9 +26,16 @@ export class ChatRoomComponent {
   constructor(private webSocketService: WebSocketService, private chatApiService: ChatApiService, private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
-      this.webSocketService.connect("Ram");
+    let user = this.authService.getUserDetails();
+    if(user?.jti){
+      this.message.sender = user.jti;
+    } else {
+      this.message.sender = '';
+    }
+    if(this.message.sender){
+      this.webSocketService.connect(user.jti);
       this.webSocketService.messages$.subscribe((message) => {
-          if (message) {
+          if (message && message !='') {
             this.messages.push(message);
           }
       });
@@ -46,10 +54,11 @@ export class ChatRoomComponent {
         } 
         this.currScrollValue = newValue;
       });
+    }
   }
 
   sendMessage() {
-    if(this.message.content){
+    if(this.message.content && this.message.sender){
       this.webSocketService.sendMessage(this.message?.sender, this.message.content);
       this.message.content = '';
       this.scrollToBottom();
@@ -97,7 +106,7 @@ export class ChatRoomComponent {
   }
 
   addMember(){
-    
+
   }
   
 

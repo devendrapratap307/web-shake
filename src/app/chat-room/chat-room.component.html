@@ -87,7 +87,7 @@
                 <!-- Input Area at the bottom -->
                 <div class="input-area">
                     <input type="text" id="messageInput" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()"/>
-                    <button [disabled]="!message.content" (click)="sendMessage()">Send</button>
+                    <button [disabled]="!message.content || !message.sender" (click)="sendMessage()">Send</button>
                 </div>
             </div>
         </div>
