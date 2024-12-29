@@ -14,30 +14,93 @@
 </div> -->
 
 
-<div class="chat-container">
-    <!-- Chat Header -->
-    <div class="chat-header">
-      Chat Shake <input [(ngModel)]="message.sender" placeholder="User Name" />
-    </div>
+    <!-- <div class="chat-container"> -->
+         <div class="chat-header">
+        Chat Shake <input [(ngModel)]="message.sender" placeholder="User Name" />
+        </div> 
+    <!--    <div class="chat-messages">
+            <ng-container *ngFor="let msg of messages">
+                <div [class]="msg.sender == message.sender ? 'message sent' : 'message'">
+                    <div class="message-header">
+                    <span class="username">{{ msg.sender }}</span>
+                    <span class="timestamp">{{ msg?.time }}</span>
+                </div>
+                    {{ msg.content }}</div>
+            </ng-container>
+        
+        </div>
+        <div class="chat-input-area">
+        <input type="text" class="chat-input" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()"/>
+        <button class="send-button" (click)="sendMessage()">Send</button>
+        </div>
+    </div> -->
 
-    <!-- Chat Messages -->
-    <div class="chat-messages">
-        <ng-container *ngFor="let msg of messages">
-            
-              <!-- <div class="message-content">{{ msg.content }}</div> -->
-            <div [class]="msg.sender == message.sender ? 'message sent' : 'message'">
-                <div class="message-header">
-                <span class="username">{{ msg.sender }}</span>
-                <span class="timestamp">{{ msg?.time }}</span>
+
+  <div class="container-fluid">
+    <!-- Tab Navigation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="btn-group w-100 tabs-nav">
+                <button class="btn btn-primary active" onclick="switchTab('chat')">Chat</button>
+                <button class="btn btn-primary" onclick="switchTab('calculation')">Calculation</button>
             </div>
-                {{ msg.content }}</div>
-        </ng-container>
-      
+        </div>
     </div>
 
-    <!-- Chat Input Area -->
-    <div class="chat-input-area">
-      <input type="text" class="chat-input" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()"/>
-      <button class="send-button" (click)="sendMessage()">Send</button>
+    <!-- Chat Tab -->
+    <div class="tab-content chat-tab" id="chatTab" style="display: block;">
+        <div class="row chat-container">
+            <!-- Left: Member List -->
+            <div class="member-list">
+                <h5>Members</h5>
+                <ul class="list-unstyled">
+                    <li class="member-item" onclick="openChat('User 1')">User 1</li>
+                    <li class="member-item" onclick="openChat('User 2')">User 2</li>
+                    <li class="member-item" onclick="openChat('User 3')">User 3</li>
+                </ul>
+            </div>
+
+            <!-- Right: Chat Room -->
+            <div class="chat-room">
+                <div class="chat-header" id="chatHeader">
+                    Chat with: <b>User 1</b>
+                </div>
+
+                <div class="chat-area" id="chatArea">
+                    <div cdkScrollable #chatWindow class="chat-window" (scroll)="onScroll($event)">
+                        <ng-container *ngFor="let msg of messages">
+                            <div [class]="msg.sender == message.sender ? 'message sent' : 'message'">
+                                <!-- <div class="message-header">
+                                  <span class="username">{{ msg.sender }}</span>
+                                  <span class="timestamp">{{ msg?.time }}</span>
+                                  </div> -->
+                                  {{ msg.content }}
+                            </div>   
+                        </ng-container>
+                    </div>
+                </div>
+
+                <!-- Input Area at the bottom -->
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()"/>
+                    <button [disabled]="!message.content" (click)="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <!-- Calculation Tab -->
+    <div class="tab-content calculation-tab" id="calculationTab" style="display: none;">
+        <div class="chat-room">
+            <div class="chat-header">Calculation</div>
+            <div class="chat-area">
+                <p>Results or inputs related to calculations will be shown here.</p>
+            </div>
+            <div class="input-area">
+                <input type="text" placeholder="Enter calculation..." />
+                <button>Calculate</button>
+            </div>
+        </div>
+    </div>
+</div>
+

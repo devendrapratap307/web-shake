@@ -1,0 +1,57 @@
+<p>auth works!</p>
+<div class="container">
+    <div class="row justify-content-center">
+      <ng-container *ngIf="!loginFlag">
+        <div class="col-md-6 form-container">
+            <h2 class="form-title">Login</h2>
+            <ng-container *ngIf="errorList?.length">
+              <span *ngFor="let er of errorList" class="error-message">{{er}}</span>
+            </ng-container>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-input" name="username" [(ngModel)]="user.username" required>
+                <!-- <span *ngIf="user.username && !isEmailValid()" class="error-message">Invalid email format.</span> -->
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-input" name="password" [(ngModel)]="user.password" required>
+                <span *ngIf="user.password && !isPasswordValid()" class="error-message">Password must be at least 8 characters long.</span>
+              </div>
+              <!-- {{user | json}} -->
+              <button type="submit" class="btn btn-primary" [disabled]="!user || !user.username || !user.password" (click)="login()">Login</button>
+            <p class="mt-3">Don't have an account? <a routerLink="" (click)="logging(true)">Signup</a></p>
+          </div>
+      </ng-container>
+      <ng-container *ngIf="loginFlag">
+        <h2 class="form-title">Signup</h2>
+        <div class="col-md-6 form-container">
+          <ng-container *ngIf="errorList?.length">
+            <span *ngFor="let er of errorList" class="error-message">{{er}}</span>
+          </ng-container>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-input" name="email" [(ngModel)]="user.email" required>
+                <span *ngIf="user.email && !isEmailValid()" class="error-message">Invalid email format.</span>
+            </div>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-input" name="username" [(ngModel)]="user.username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-input" name="password" [(ngModel)]="user.password" required>
+                <span *ngIf="user.password && !isPasswordValid()" class="error-message">Password must be at least 8 characters long.</span>
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-input" name="confirmPassword" [(ngModel)]="user.confirmPassword" required>
+                <span *ngIf="user.confirmPassword && (!isPasswordsMatch()|| !isPasswordValid())" [class]=" isPasswordsMatch() ? 'error-message matched' : 'error-message'">{{isPasswordsMatch() ? 'Password matched.' : 'Password mismatched.'}}</span>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="!user || !user.email || !user.password" (click)="SignUp()">Signup</button>    
+        </div>
+        <p class="mt-3">Already have an account? <a routerLink="" (click)="logging()">Login</a></p>
+      </ng-container>
+    </div>
+</div>
+  
+  

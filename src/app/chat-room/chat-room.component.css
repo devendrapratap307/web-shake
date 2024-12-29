@@ -1,156 +1,181 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
-  }
-  .chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    max-width: 100%;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
+    /* Custom Styles */
+    .chat-container {
+        display: flex;
+        flex-direction: row;
+        height: 80vh;
+        margin-top: 20px;
+    }
 
-  /* Chat header */
-  .chat-header {
-    background-color: #0078d4;
-    color: white;
-    padding: 1rem;
-    font-size: 1.2rem;
-    text-align: left;
-  }
+    /* Left side - Member list */
+    .member-list {
+        width: 250px;
+        background-color: #f8f9fa;
+        border-right: 1px solid #ddd;
+        padding: 10px;
+        overflow-y: auto;
+    }
 
-  .message-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9em;
-    color: #888;
-    margin-bottom: 5px;
-  }
-  
-  .username {
-    font-size: 0.8em; /* Smaller font size */
-    color: #aaa; /* Faded color */
-    font-weight: lighter;
-  }
-  
-  .timestamp {
-    color: #aaa;
-  }
-  
-  .message-content {
-    font-size: 1em;
-    color: #333;
-  }
+    .member-item {
+        padding: 10px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
 
-  /* Chat messages container */
-  .chat-messages {
-    flex-grow: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    border-bottom: 1px solid #ddd;
-  }
+    .member-item:hover {
+        background-color: #f1f1f1;
+    }
 
-  /* Chat input area */
-  .chat-input-area {
-    display: flex;
-    padding: 1rem;
-    background-color: #f7f7f7;
-    border-top: 1px solid #ddd;
-  }
+    /* Right side - Chat room */
+    .chat-room {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        background-color: #e9ecef;
+        padding: 20px;
+        border-left: 1px solid #ddd;
+        position: relative;
+    }
 
-  .chat-input {
-    width: 100%;
-    padding: 0.8rem;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    margin-right: 1rem;
-  }
+    .chat-header {
+        background-color: #9999b5;
+        color: rgb(5, 5, 5);
+        padding: 10px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
 
-  .send-button {
-    padding: 0.8rem 1.2rem;
-    background-color: #0078d4;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+    .chat-area {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 60px; /* To avoid overlap with input area */
+    }
 
-  .send-button:hover {
-    background-color: #005fa3;
-  }
+    .message {
+        margin-bottom: 10px;
+    }
 
-  /* Message bubble */
-  .message {
+    .message-sender {
+        font-weight: bold;
+    }
+
+    .message-text {
+        margin-left: 10px;
+    }
+
+    .input-area {
+        position: absolute;
+        bottom: 20px;
+        width: 97%;
+        display: flex;
+        padding: 10px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        align-items: center;
+    }
+
+    .input-area input {
+        width: 85%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 25px;
+        margin-right: 10px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .input-area input:focus {
+        border-color: #007bff;
+    }
+
+    .input-area button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .input-area button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Tabs navigation */
+    .tabs-nav button {
+        width: 50%;
+        padding: 15px;
+        font-size: 16px;
+    }
+    .message {
     margin-bottom: 1rem;
     max-width: 60%;
     padding: 0.8rem;
     border-radius: 10px;
     background-color: #e4e4e4;
-  }
-
-  .message.sent {
-    background-color: #0078d4;
-    color: white;
-    margin-left: auto;
-  }
-
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .chat-container {
-      max-width: 100%;
-      margin: 0;
-      height: 100vh;
-    }
-
-    .chat-header {
-      font-size: 1rem;
-      padding: 0.8rem;
-    }
-
-    .chat-messages {
-      padding: 0.8rem;
-    }
-
-    .chat-input-area {
-      padding: 0.8rem;
-    }
-
-    .chat-input {
-      padding: 0.6rem;
-    }
-
-    .send-button {
-      padding: 0.6rem 1rem;
-    }
-
-    .message {
-      max-width: 80%;
     }
 
     .message.sent {
-      max-width: 80%;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .chat-header {
-      font-size: 0.9rem;
-      padding: 0.6rem;
+    background-color: #d48600;
+    color: white;
+    margin-left: auto;
     }
 
-    .chat-input-area {
-      padding: 0.6rem;
+    .chat-window {
+        width: 100%; /* Full width of the container */
+        height: 500px; /* Fixed height for scrolling */
+        overflow-y: auto; /* Enable vertical scrolling */
+        border: 1px solid #ccc; /* Optional: Add a border */
+        border-radius: 5px; /* Optional: Rounded corners */
+        padding: 10px; /* Add padding inside the chat window */
+        background-color: #f9f9f9; /* Light background for better visibility */
+        scroll-behavior: smooth;
+      }
+      
+    
+      
+      /* Optional: For better responsiveness */
+      @media (max-width: 600px) {
+        .chat-window {
+          height: 300px; /* Reduce height for smaller screens */
+        }
+      }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+        height: auto;
     }
 
-    .send-button {
-      padding: 0.5rem 0.8rem;
+    .member-list {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .chat-room {
+        width: 100%;
+    }
+
+    .input-area input {
+        width: 70%;
+    }
+
+    .input-area button {
+        width: 25%;
+    }
+
+    .tabs-nav button {
+        width: 100%;
     }
 
     .message {
-      font-size: 0.9rem;
-    }
-  }
+        max-width: 80%;
+      }
+  
+      .message.sent {
+        max-width: 80%;
+      }
+} 

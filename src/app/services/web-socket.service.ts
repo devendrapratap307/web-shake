@@ -14,6 +14,9 @@ export class WebSocketService {
   private connectionSubject = new BehaviorSubject<boolean>(false);
   public connectionStatus$ = this.connectionSubject.asObservable();
 
+  private sharedValue = new BehaviorSubject<number>(0);
+  sharedValue$ = this.sharedValue.asObservable();
+
   constructor() {}
 
   /**
@@ -47,6 +50,8 @@ export class WebSocketService {
         try {
           const parsedMessage = JSON.parse(message.body);
           this.messageSubject.next(parsedMessage);
+          console.log("/topic/public-------------------", parsedMessage);
+          this.sharedValue.next(this.sharedValue.getValue()+1);
         } catch (error) {
           console.error('Error parsing message body:', error);
         }
@@ -94,6 +99,17 @@ export class WebSocketService {
    */
   getMessages(): Observable<any> {
     return this.messages$;
+  }
+
+
+  subscribeToMessages(chatRoomId: string): Observable<any> {
+    return new Observable((subscriber) => {
+      if (this.stompClient && this.stompClient.connected){
+        this.stompClient.subscribe(`/topic/${chatRoomId}`, (message: any) => {
+          subscriber.next(JSON.parse(message.body));
+        });
+      }
+    });
   }
 
   /**
