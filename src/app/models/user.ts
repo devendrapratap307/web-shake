@@ -4,4 +4,5 @@ export class User {
     password: string | undefined;
     confirmPassword: string | undefined;
     email: string | undefined;
+    name: string |undefined;
 }
