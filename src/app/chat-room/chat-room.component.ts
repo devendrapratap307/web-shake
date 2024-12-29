@@ -3,7 +3,7 @@ import { WebSocketService } from '../services/web-socket.service';
 import { ChatApiService } from '../services/chat-api.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { Message } from '../models/message';
+import { ChatMessage } from '../models/chat-message';
 
 @Component({
   selector: 'app-chat-room',
@@ -12,8 +12,8 @@ import { Message } from '../models/message';
 })
 export class ChatRoomComponent {
   @ViewChild('chatWindow') chatWindow!: ElementRef; 
-  messages: any[] = [];
-  message: Message = new Message();
+  messages: ChatMessage[] = [];
+  message: ChatMessage = new ChatMessage();
   isConnected: boolean = false;
   connectingMessage: string = '';
 
@@ -29,6 +29,7 @@ export class ChatRoomComponent {
     let user = this.authService.getUserDetails();
     if(user?.jti){
       this.message.sender = user.jti;
+      this.message.roomId = "room-1";
     } else {
       this.message.sender = '';
     }
@@ -58,8 +59,8 @@ export class ChatRoomComponent {
   }
 
   sendMessage() {
-    if(this.message.content && this.message.sender){
-      this.webSocketService.sendMessage(this.message?.sender, this.message.content);
+    if(this.message?.roomId, this.message.content && this.message.sender){
+      this.webSocketService.sendMessage(this.message.roomId, this.message.sender, this.message.content);
       this.message.content = '';
       this.scrollToBottom();
     }

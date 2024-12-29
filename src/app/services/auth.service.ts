@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../models/user';
 import { jwtDecode } from 'jwt-decode';
+import { JWT_TOKEN } from '../data';
 
 @Injectable({
   providedIn: 'root'
@@ -21,11 +22,11 @@ export class AuthService {
   }
 
   storeToken(token: string): void {
-    localStorage.setItem('jwt_token', token);
+    localStorage.setItem(JWT_TOKEN, token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('jwt_token');
+    return localStorage.getItem(JWT_TOKEN);
   }
 
   getUserDetails(): any {
@@ -37,7 +38,7 @@ export class AuthService {
   }
 
   removeToken(): void {
-    localStorage.removeItem('jwt_token');
+    localStorage.removeItem(JWT_TOKEN);
   }
 
   isAuthenticated(): boolean {

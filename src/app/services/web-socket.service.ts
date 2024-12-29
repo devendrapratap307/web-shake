@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { Client, Message, Stomp } from '@stomp/stompjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as SockJS from 'sockjs-client';
+import { JWT_TOKEN } from '../data';
+import { ChatMessage } from '../models/chat-message';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root',
@@ -18,17 +21,12 @@ export class WebSocketService {
   sharedValue$ = this.sharedValue.asObservable();
 
   constructor() {}
-
-  /**
-   * Connects to the WebSocket server.
-   * @param username Optional username for the chat.
-   */
   connect(username?: string): void {
-    // const token = localStorage.getItem('token');  // Assuming the JWT token is stored in localStorage
-    // if (!token) {
-    //   console.error('No JWT token found. Cannot connect.');
-    //   return;  // Prevent connection if token is missing
-    // }
+    const token = localStorage.getItem(JWT_TOKEN);  
+    if (!token) {
+      console.error('No JWT token found. Cannot connect.');
+      return; 
+    }
     const socket = new SockJS('http://localhost:7076/ws');
 
     this.stompClient = new Client({
@@ -48,18 +46,24 @@ export class WebSocketService {
       // Subscribe to the topic
       this.stompClient?.subscribe('/topic/public', (message: Message) => {
         try {
-          const parsedMessage = JSON.parse(message.body);
-          this.messageSubject.next(parsedMessage);
-          console.log("/topic/public-------------------", parsedMessage);
-          this.sharedValue.next(this.sharedValue.getValue()+1);
+          const parsedMessage: ChatMessage = JSON.parse(message.body);
+          if(parsedMessage?.content){
+            this.messageSubject.next(parsedMessage);
+            console.log("/topic/public-------------------", parsedMessage);
+            this.sharedValue.next(this.sharedValue.getValue()+1);
+          }
         } catch (error) {
           console.error('Error parsing message body:', error);
         }
       });
 
       // Notify the server of a new user joining
-      if (username) {
-        this.sendMessage(username, '', 'JOIN');
+      if (token) {
+        const userdetails = jwtDecode(token);
+        if(userdetails?.jti){
+          this.sendMessage(userdetails.jti, '', 'JOIN');
+        }
+      
       }
     };
 
@@ -79,19 +83,25 @@ export class WebSocketService {
    * @param content The message content.
    * @param type The type of message ('CHAT', 'JOIN', etc.).
    */
-  sendMessage(username: string, content: string, type: string = 'CHAT'): void {
+  sendMessage(roomId: string | undefined, username: string | undefined, content: string | undefined, type: string = 'CHAT'): void {
     if (this.stompClient && this.stompClient.connected) {
-      const message = { sender: username, content, type };
+      const message: ChatMessage = new ChatMessage();// { sender: username, content: content, type: type };
+      message.roomId = roomId;
+      message.sender = username;
+      message.content = content;
+      message.type = type;
+      
       this.stompClient.publish({
         destination: '/app/chat.sendMessage',
         body: JSON.stringify(message),
       });
-    } else {
-      console.error('Cannot send message: WebSocket is not connected.');
-      setTimeout(()=>{
-        this.connect();
-      }, 300);
-    }
+    } 
+    // else {
+    //   console.error('Cannot send message: WebSocket is not connected.');
+    //   setTimeout(()=>{
+    //     this.connect();
+    //   }, 300);
+    // }
   }
 
   /**
