@@ -1,0 +1,16 @@
+.chat-header {
+    background-color: #9999b5;
+    color: rgb(5, 5, 5);
+    padding: 10px;
+    font-weight: bold;
+    margin-bottom: 10px; 
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+    border-bottom: 1px solid #ccc;
+}
+
+.button-group {
+    display: flex; 
+    gap: 5px; 
+  }

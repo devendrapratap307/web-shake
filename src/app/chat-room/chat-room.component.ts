@@ -1,6 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { WebSocketService } from '../services/web-socket.service';
 import { ChatApiService } from '../services/chat-api.service';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-chat-room',
@@ -20,7 +22,7 @@ export class ChatRoomComponent {
   loading = false;
   currScrollValue: number =0;
 
-  constructor(private webSocketService: WebSocketService, private chatApiService: ChatApiService) {}
+  constructor(private webSocketService: WebSocketService, private chatApiService: ChatApiService, private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
       this.webSocketService.connect("Ram");
@@ -87,6 +89,15 @@ export class ChatRoomComponent {
     } catch (err) {
       console.error('Failed to scroll to bottom:', err);
     }
+  }
+
+  logout(){
+    this.authService.removeToken();
+    this.router.navigate(['']);
+  }
+
+  addMember(){
+    
   }
   
 

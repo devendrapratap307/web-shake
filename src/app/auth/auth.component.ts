@@ -3,6 +3,7 @@ import { User } from '../models/user';
 import { AuthService } from '../services/auth.service';
 import { LoaderComponent } from '../loader/loader.component';
 import { LoaderService } from '../services/loader.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth',
@@ -15,7 +16,7 @@ export class AuthComponent {
   errorList: string[] = [];
 
 
-  constructor(private authService: AuthService, private loaderService: LoaderService){}
+  constructor(private authService: AuthService, private loaderService: LoaderService, private router: Router){}
   logging(signupFlag: boolean = false){
     this.loginFlag = signupFlag;
     this.user= new User();
@@ -26,7 +27,7 @@ export class AuthComponent {
       this.authService.addUser(this.user).subscribe(resp=>{
         console.log("signup---------");
         if(resp && resp.status ==200){
-
+          this.logging();
         } else {
           this.errorList.push(resp?.message);
         }
@@ -41,8 +42,10 @@ export class AuthComponent {
       this.authService.authenticateUser(this.user.username, this.user.password).subscribe(resp=>{
         console.log("login---------", resp.status, this.errorList);
         if(resp && resp.token){
-          this.authService.storeToken(resp.token)
+          this.authService.storeToken(resp.token);
+          this.router.navigate(['/chat']); 
         } else {
+          // this.router.navigate(['/auth']);
           this.errorList.push(resp?.message);
         }
         console.log("login---------", resp.status, this.errorList);
@@ -50,6 +53,7 @@ export class AuthComponent {
       }, err=>{
         this.errorList.push(err?.message);
         this.loaderService.loader();
+        // this.router.navigate(['/auth']);
       });
     }
   }

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../models/user';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +28,24 @@ export class AuthService {
     return localStorage.getItem('jwt_token');
   }
 
+  getUserDetails(): any {
+    const token = this.getToken();
+    if (token) {
+      return jwtDecode(token); 
+    }
+    return null;
+  }
+
   removeToken(): void {
     localStorage.removeItem('jwt_token');
   }
 
   isAuthenticated(): boolean {
     return this.getToken() !== null;
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    return !!token; 
   }
 }

@@ -43,7 +43,11 @@
         color: rgb(5, 5, 5);
         padding: 10px;
         font-weight: bold;
-        margin-bottom: 20px;
+        margin-bottom: 10px; 
+        display: flex;
+        align-items: center; 
+        justify-content: space-between; 
+        border-bottom: 1px solid #ccc;
     }
 
     .chat-area {
@@ -179,3 +183,8 @@
         max-width: 80%;
       }
 } 
+
+.button-group {
+    display: flex; 
+    gap: 5px; 
+  }
