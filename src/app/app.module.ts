@@ -15,6 +15,11 @@ import { JwtInterceptor } from './jwt.interceptor';
 import { HeaderComponent } from './header/header.component';
 import { ButtonModule } from 'primeng/button';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { DialogModule } from 'primeng/dialog';
+import { TabViewModule } from 'primeng/tabview';
+import { TabMenuModule } from 'primeng/tabmenu';
+import { TableModule } from 'primeng/table';
+import { ToastModule } from 'primeng/toast';
 @NgModule({
   declarations: [
     AppComponent,
@@ -32,7 +37,13 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
     MatProgressSpinnerModule,
     BrowserAnimationsModule,
     ButtonModule,
-    AutoCompleteModule
+    AutoCompleteModule,
+    DialogModule,
+    TabViewModule,
+    TabMenuModule,
+    TableModule,
+    ToastModule
+
   ],
   providers: [
     {

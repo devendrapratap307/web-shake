@@ -1,52 +1,15 @@
-<!-- <p>chat-room works!</p>
-<input [(ngModel)]="message.sender" placeholder="User Name" />
-<div class="chat-container">
-    <div class="messages">
-        <div *ngFor="let msg of messages">
-            <div [style.text-align]="msg.sender == message.sender ? 'right' : 'left'"> <strong>{{ msg.sender }}:</strong> {{ msg.content }}</div>
-        </div>
-    </div>
-    <ng-container *ngIf="message?.sender">
-        <input [(ngModel)]="message.content" placeholder="Type a message..." />
-        <button (click)="sendMessage()">Send</button>
-    </ng-container>
-    
-</div> -->
+<p-toast />
 <app-header></app-header>
-
-    <!-- <div class="chat-container"> -->
-        <!-- <div class="chat-header">
-            Web Shake <input [(ngModel)]="message.sender" placeholder="User Name" />
-            <div class="button-group">
-                <button class="btn btn-primary" (click)="addMember()">Add Member</button>
-            <button class="btn btn-danger" (click)="logout()">Logout</button>
-            </div>
-        </div>  -->
-    <!--    <div class="chat-messages">
-            <ng-container *ngFor="let msg of messages">
-                <div [class]="msg.sender == message.sender ? 'message sent' : 'message'">
-                    <div class="message-header">
-                    <span class="username">{{ msg.sender }}</span>
-                    <span class="timestamp">{{ msg?.time }}</span>
-                </div>
-                    {{ msg.content }}</div>
-            </ng-container>
-        
-        </div>
-        <div class="chat-input-area">
-        <input type="text" class="chat-input" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()"/>
-        <button class="send-button" (click)="sendMessage()">Send</button>
-        </div>
-    </div> -->
-
+<!-- <p-tabMenu [model]="items" [activeItem]="activeItem" (activeItemChange)="onActiveItemChange($event)"/> -->
+<!-- ##{{activeItem | json}} -->
 
   <div class="container-fluid">
-    <!-- Tab Navigation -->
     <div class="row">
         <div class="col-12">
             <div class="btn-group w-100 tabs-nav">
                 <button class="btn btn-primary active" onclick="switchTab('chat')">Chat</button>
-                <button class="btn btn-primary" onclick="switchTab('calculation')">Calculation</button>
+                <button class="btn btn-primary" onclick="switchTab('calculation')">Group Outlay</button>
+                <button class="btn btn-primary active" onclick="switchTab('calculation')">Self Outlay</button>
             </div>
         </div>
     </div>

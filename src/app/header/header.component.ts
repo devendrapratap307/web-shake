@@ -11,6 +11,36 @@ import { Router } from '@angular/router';
 })
 export class HeaderComponent {
   user: any;
+  visible: boolean = false;
+  tabs: { title: string, value: number }[] = [
+    { title: 'Requested', value: 1 },
+    { title: 'Requestors', value: 2 }
+  ];
+  products: any[]= [
+    {username:'c', status: "Pending"},
+    {username:'d', status: "Accepted"},
+    {username:'e', status: "Deny"},
+    {username:'c', status: "Pending"},
+    {username:'d', status: "Accepted"},
+    {username:'e', status: "Deny"},
+    {username:'c', status: "Pending"},
+    {username:'d', status: "Accepted"},
+    {username:'e', status: "Deny"},
+    {username:'c', status: "Pending"},
+    {username:'d', status: "Accepted"},
+    {username:'e', status: "Deny"},
+    {username:'c', status: "Pending"},
+    {username:'d', status: "Accepted"},
+    {username:'e', status: "Deny"},
+    {username:'c', status: "Pending"},
+    {username:'d', status: "Accepted"},
+    {username:'e', status: "Deny"},
+    {username:'c', status: "Pending"},
+    {username:'d', status: "Accepted"},
+    {username:'e', status: "Deny"},
+  ]
+
+
   constructor(private webSocketService: WebSocketService, private authService: AuthService, private router: Router){
     this.user = this.authService.getUserDetails();
   }

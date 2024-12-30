@@ -59,10 +59,10 @@ export class WebSocketService {
 
       // Notify the server of a new user joining
       if (token) {
-        const userdetails = jwtDecode(token);
-        if(userdetails?.jti){
+        const userData = jwtDecode(token);
+        if(userData?.userId){
           let roomId = undefined;
-          this.sendMessage(roomId, userdetails.jti, '', 'JOIN');
+          this.sendMessage(roomId, userData.userId, '', 'JOIN');
         }
       
       }
