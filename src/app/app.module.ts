@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -12,7 +13,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { JwtInterceptor } from './jwt.interceptor';
 import { HeaderComponent } from './header/header.component';
-
+import { ButtonModule } from 'primeng/button';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 @NgModule({
   declarations: [
     AppComponent,
@@ -27,7 +29,10 @@ import { HeaderComponent } from './header/header.component';
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    BrowserAnimationsModule,
+    ButtonModule,
+    AutoCompleteModule
   ],
   providers: [
     {

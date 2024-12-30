@@ -47,7 +47,7 @@ export class WebSocketService {
       this.stompClient?.subscribe('/topic/public', (message: Message) => {
         try {
           const parsedMessage: ChatMessage = JSON.parse(message.body);
-          if(parsedMessage?.content){
+          if(parsedMessage?.content && parsedMessage?.type !='JOIN'){
             this.messageSubject.next(parsedMessage);
             console.log("/topic/public-------------------", parsedMessage);
             this.sharedValue.next(this.sharedValue.getValue()+1);
@@ -61,7 +61,8 @@ export class WebSocketService {
       if (token) {
         const userdetails = jwtDecode(token);
         if(userdetails?.jti){
-          this.sendMessage(userdetails.jti, '', 'JOIN');
+          let roomId = undefined;
+          this.sendMessage(roomId, userdetails.jti, '', 'JOIN');
         }
       
       }
