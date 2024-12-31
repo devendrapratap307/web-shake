@@ -8,6 +8,20 @@
     </div>
 </div> 
 <p-dialog header="Connection Request" [modal]="true" [(visible)]="visible" [style]="{ width: '80rem' }">
+    <!-- <p-button icon="pi pi-share-alt" label="Invite" [raised]="true" size="small"></p-button> -->
+        <div class="card flex justify-content-center">##{{reqUser | json}}##
+        <p-autoComplete
+            [(ngModel)]="reqUser"
+            [suggestions]="autoUserList"
+            (completeMethod)="searchUsers($event)"
+            field="username"
+            [dropdown]="true" 
+            (onSelect)="onUserSelect($event)"
+            (onClear)="onUserClear($event)"
+            [placeholder]="'User Name'" />
+        <p-button *ngIf="reqUser?.id" [disabled]="!reqUser?.id" icon="pi pi-user" label="Invite" [raised]="true" size="small" (onClick)="requestUser()"></p-button>
+
+    </div>
     <div class="card">
         <p-tabView>
             <p-tabPanel *ngFor="let tab of tabs" [header]="tab.title">

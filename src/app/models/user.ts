@@ -6,3 +6,13 @@ export class User {
     email: string | undefined;
     name: string |undefined;
 }
+
+export class SearchReq {
+    page = 1;
+    limit = 10;
+
+    label: string | undefined;
+    name: string |undefined;
+    username: string | undefined;
+    
+}

@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { User } from '../models/user';
+import { SearchReq, User } from '../models/user';
 import { jwtDecode } from 'jwt-decode';
 import { JWT_TOKEN } from '../data';
+import { RoomRequest } from '../models/room-request';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,10 @@ export class AuthService {
 
   addUser(user: User): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/user/add`, user);
+  }
+
+  searUserList(searcReq: SearchReq): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/user/search`, searcReq);
   }
 
   authenticateUser(username: string, password: string): Observable<any> {
