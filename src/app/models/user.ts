@@ -14,5 +14,10 @@ export class SearchReq {
     label: string | undefined;
     name: string |undefined;
     username: string | undefined;
+
+    status: string | undefined;
+    type: string | undefined;
+    participant: string | undefined;
+    roomId: string | undefined;
     
 }

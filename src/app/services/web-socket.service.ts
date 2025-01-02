@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client, Message, Stomp } from '@stomp/stompjs';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import * as SockJS from 'sockjs-client';
 import { JWT_TOKEN } from '../data';
 import { ChatMessage } from '../models/chat-message';
@@ -11,7 +11,7 @@ import { jwtDecode } from 'jwt-decode';
 })
 export class WebSocketService {
   private stompClient: Client | null = null;
-  private messageSubject = new BehaviorSubject<any>(null);
+  private messageSubject = new Subject<any>();
   public messages$ = this.messageSubject.asObservable();
 
   private connectionSubject = new BehaviorSubject<boolean>(false);
@@ -19,9 +19,14 @@ export class WebSocketService {
 
   private sharedValue = new BehaviorSubject<number>(0);
   sharedValue$ = this.sharedValue.asObservable();
+  public chatRoomValue = new BehaviorSubject<boolean>(false);
+  chatRoom$ = this.chatRoomValue.asObservable();
 
   constructor() {}
-  connect(username?: string): void {
+  connect(roomId: string, username?: string): void {
+    if (this.stompClient && this.stompClient.connected){
+      this.disconnect();
+    }
     const token = localStorage.getItem(JWT_TOKEN);  
     if (!token) {
       console.error('No JWT token found. Cannot connect.');
@@ -31,7 +36,7 @@ export class WebSocketService {
 
     this.stompClient = new Client({
       webSocketFactory: () => socket,
-      reconnectDelay: 5000, // Retry connection after delay if disconnected
+      reconnectDelay: 1000, // Retry connection after delay if disconnected
       debug: (str) => console.log(`[STOMP DEBUG]: ${str}`),
       // connectHeaders: {
       //   Authorization: `Bearer ${token}`,  // Pass JWT token in headers for WebSocket connection
@@ -44,13 +49,13 @@ export class WebSocketService {
       this.connectionSubject.next(true);
 
       // Subscribe to the topic
-      this.stompClient?.subscribe('/topic/public', (message: Message) => {
+      this.stompClient?.subscribe('/topic/public/'+roomId, (message: Message) => {
         try {
           const parsedMessage: ChatMessage = JSON.parse(message.body);
           if(parsedMessage?.content && parsedMessage?.type !='JOIN'){
             this.messageSubject.next(parsedMessage);
-            console.log("/topic/public-------------------", parsedMessage);
             this.sharedValue.next(this.sharedValue.getValue()+1);
+            console.log("/topic/public-------------------", parsedMessage, this.sharedValue.getValue()+1);
           }
         } catch (error) {
           console.error('Error parsing message body:', error);
@@ -61,7 +66,6 @@ export class WebSocketService {
       if (token) {
         const userData = jwtDecode(token);
         if(userData?.userId){
-          let roomId = undefined;
           this.sendMessage(roomId, userData.userId, '', 'JOIN');
         }
       
@@ -91,11 +95,12 @@ export class WebSocketService {
       message.sender = username;
       message.content = content;
       message.type = type;
-      
-      this.stompClient.publish({
-        destination: '/app/chat.sendMessage',
-        body: JSON.stringify(message),
-      });
+      if(roomId){
+        this.stompClient.publish({
+          destination: '/app/chat.sendMessage/'+roomId,
+          body: JSON.stringify(message),
+        });
+      }
     } 
     // else {
     //   console.error('Cannot send message: WebSocket is not connected.');

@@ -14,3 +14,15 @@
     display: flex; 
     gap: 5px; 
   }
+
+  .empty-state {
+    text-align: center;
+    margin-top: 20px;
+    color: #888;
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #ccc;
+}

@@ -5,6 +5,9 @@ import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { ChatMessage } from '../models/chat-message';
 import { MenuItem, MessageService } from 'primeng/api';
+import { SearchReq } from '../models/user';
+import { ChatRoom } from '../models/chat-room';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chat-room',
@@ -18,13 +21,18 @@ export class ChatRoomComponent implements OnInit{
   message: ChatMessage = new ChatMessage();
   isConnected: boolean = false;
   connectingMessage: string = '';
+  currUser: any;
+  chatRoomList: ChatRoom[] = [];
+  selectedRow: number | null = null;
+  selectedRoom: ChatRoom = new ChatRoom();
+  subscription: Subscription | null = null;
 
   page = 0;
   size = 20;
-  chatRoomId = 'room123'; // Example chat room ID
   loading = false;
   currScrollValue: number =0;
   
+  activeTab: number = 0;
   activeItem: MenuItem | undefined;
   items: MenuItem[] =  [
     { label: 'Chat', icon: 'pi pi-comments' },
@@ -35,17 +43,24 @@ export class ChatRoomComponent implements OnInit{
 
   ngOnInit() {
     this.activeItem = this.items[0];
-    let userData = this.authService.getUserDetails();
-    console.log("###=================",userData);
-    if(userData?.userId){
-      this.message.sender = userData.userId;
-      this.message.roomId = "room-1";
+    this.currUser = this.authService.getUserDetails();
+    console.log("###=================",this.currUser);
+    if(this.currUser?.userId){
+      this.message.sender = this.currUser.userId;
+      this.message.roomId = this.selectedRoom.id;
     } else {
       this.message.sender = '';
     }
-    if(this.message.sender){
-      this.webSocketService.connect(this.message.sender);
-      this.webSocketService.messages$.subscribe((message) => {
+
+    this.connectWebSocket();
+  }
+
+  connectWebSocket(){
+    this.messages = [];
+    this.page = 0;
+    if(this.message.sender && this.selectedRoom && this.selectedRoom.id){
+      this.webSocketService.connect(this.selectedRoom.id, this.message.sender);
+      this.subscription = this.webSocketService.messages$.subscribe((message) => {
           if (message && message !='') {
             this.messages.push(message);
           }
@@ -72,8 +87,15 @@ export class ChatRoomComponent implements OnInit{
     this.activeItem = event;
   }
 
+  destroySubscription(){
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   sendMessage() {
-    if(this.message?.roomId, this.message.content && this.message.sender){
+    if(this.selectedRoom && this.selectedRoom?.id, this.message.content && this.message.sender){
+      this.message.roomId = this.selectedRoom?.id;
       this.webSocketService.sendMessage(this.message.roomId, this.message.sender, this.message.content);
       this.message.content = '';
       this.scrollToBottom();
@@ -91,17 +113,21 @@ export class ChatRoomComponent implements OnInit{
   loadMessages() {
     if (this.loading) return;
     this.loading = true;
-    this.chatApiService.getMessages(this.chatRoomId, this.page, this.size).subscribe((newMessages) => {
-      this.messages = [...newMessages.reverse(), ...this.messages];
-      this.page++;
-      this.loading = false;
-    });
+    if(this.selectedRoom.id){
+      this.chatApiService.getMessages(this.selectedRoom.id, this.page, this.size).subscribe((newMessages) => {
+        this.messages = [...newMessages.reverse(), ...this.messages];
+        this.page++;
+        this.loading = false;
+      });
+    }
   }
 
   subscribeToWebSocket() {
-    this.webSocketService.subscribeToMessages(this.chatRoomId).subscribe((message) => {
-      this.messages.push(message);
-    });
+    if(this.selectedRoom.id){
+      this.webSocketService.subscribeToMessages(this.selectedRoom.id).subscribe((message) => {
+        this.messages.push(message);
+      });
+    }
   }
 
   scrollToBottom(): void {
@@ -126,6 +152,34 @@ export class ChatRoomComponent implements OnInit{
 
   messageAlert(severityData: string = 'success', summaryData: string = 'Success', detailData:string) {
     this.messageService.add({ severity: severityData, summary: summaryData, detail: detailData });
+  }
+
+  getChatRoomList(chatRoomType: string, activeTab: number=0){
+    console.log("chatRoomType====", chatRoomType);
+    this.activeTab = activeTab;
+    const search: SearchReq = new SearchReq();
+    search.limit=10;
+    search.page =0;
+    search.participant = this.currUser?.userId;
+    search.type=chatRoomType;
+    if(search.participant){
+      this.chatApiService.searchChatRoomList(search).subscribe(resp=>{
+        if(resp && resp.status==200 && resp.data?.chatRoom?.dataList){
+          this.chatRoomList = resp.data.chatRoom.dataList;
+        }
+      });
+    }
+  }
+
+  selectMember(currRoom: ChatRoom, index: number): void {
+    this.selectedRow = index;
+    this.message.roomId = currRoom.id;
+    this.selectedRoom = currRoom;
+    this.destroySubscription();
+    this.connectWebSocket();
+    console.log('Selected selectedRoom:', currRoom);
+
+    // Add logic to open chat or load messages
   }
   
 

@@ -1,31 +1,36 @@
 <div class="chat-header">
-    Web Shake ({{user?.sub}})
+    Web Shake ({{currUser?.sub}})
     <div class="button-group">
-        <p-button icon="pi pi-external-link" label="Requests" [raised]="true" (onClick)="visible=true"></p-button>
+        <p-button icon="pi pi-external-link" label="Requests" [raised]="true" (onClick)="openRequestDialog()"></p-button>
         <p-button severity="danger" icon="pi pi-sign-out" label="Logout" [raised]="true" (onClick)="logout()"></p-button>
         <!-- <button class="btn btn-primary" (click)="addMember()">Add Member</button> -->
         <!-- <button class="btn btn-danger" (click)="logout()">Logout</button> -->
     </div>
 </div> 
-<p-dialog header="Connection Request" [modal]="true" [(visible)]="visible" [style]="{ width: '80rem' }">
+<p-dialog header="Connections/Requests" [modal]="true" [(visible)]="visible" [style]="{ width: '80rem' }">
     <!-- <p-button icon="pi pi-share-alt" label="Invite" [raised]="true" size="small"></p-button> -->
-        <div class="card flex justify-content-center">##{{reqUser | json}}##
-        <p-autoComplete
-            [(ngModel)]="reqUser"
-            [suggestions]="autoUserList"
-            (completeMethod)="searchUsers($event)"
-            field="username"
-            [dropdown]="true" 
-            (onSelect)="onUserSelect($event)"
-            (onClear)="onUserClear($event)"
-            [placeholder]="'User Name'" />
-        <p-button *ngIf="reqUser?.id" [disabled]="!reqUser?.id" icon="pi pi-user" label="Invite" [raised]="true" size="small" (onClick)="requestUser()"></p-button>
-
-    </div>
+        <div class="flex justify-content-center">
+            <div class="row">
+                <div class="col-3">
+                    <p-autoComplete
+                        [(ngModel)]="reqUser"
+                        [suggestions]="autoUserList"
+                        (completeMethod)="searchUsers($event)"
+                        field="username"
+                        [completeOnFocus]="true"
+                        (onSelect)="onUserSelect($event)"
+                        (onClear)="onUserClear($event)"
+                        [placeholder]="'User Name'" />
+                </div>
+                <div class="col-3">
+                    <p-button [disabled]="!reqUser?.id" label="Send Request" [raised]="true" size="small" (onClick)="requestUser()"></p-button>
+                </div>
+            </div>
+        </div>
     <div class="card">
-        <p-tabView>
+        <p-tabView [(activeIndex)]="activeIdx" (onChange)="requests()">
             <p-tabPanel *ngFor="let tab of tabs" [header]="tab.title">
-                <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true"
+                <p-table [value]="requestList" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true"
                     [rows]="10"
                     [scrollable]="true"
                     scrollHeight="300px"
@@ -38,18 +43,22 @@
                             <th>Action</th>
                         </tr>
                     </ng-template>
-                    <ng-template pTemplate="body" let-product>
+                    <ng-template pTemplate="body" let-reqRow>
                         <tr>
-                            <td>{{ product.username }}</td>
-                            <td>{{ product.status }}</td>
+                            <td>{{reqRow?.label}} {{ reqRow?.username ? '('+reqRow?.username+')':'' }}</td>
+                            <td>{{ reqRow?.status }}</td>
                             <td>
 
-                                <p-button *ngIf="tab.value==2" icon="pi pi-check" [rounded]="true" [text]="true" [raised]="true" />
-                                <p-button icon="pi pi-times" [rounded]="true" [text]="true" [raised]="true" severity="danger " />
+                                <p-button *ngIf="tab.value==2" icon="pi pi-check" [rounded]="true" [text]="true" [raised]="true" (onClick)="requestAcceptance(reqRow, true)"/>
+                                <p-button icon="pi pi-times" [rounded]="true" [text]="true" [raised]="true" severity="danger " (onClick)="requestAcceptance(reqRow)"/>
                                 <!-- <p-button [severity]="tab.value== 1 ? 'warning' : 'Primary'" [label]="tab.value== 1 ? 'Deny' :'Accept'" [text]="true" [raised]="true" [rounded]="true" size="small"/></td> -->
                         </tr>
                     </ng-template>
                 </p-table>
+                <div *ngIf="!requestList || requestList.length === 0" class="empty-state">
+                    <i class="pi pi-info-circle"></i>
+                    <p>No records found</p>
+                </div>
             </p-tabPanel>
         </p-tabView>
     </div>

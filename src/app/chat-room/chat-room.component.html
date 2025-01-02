@@ -7,9 +7,9 @@
     <div class="row">
         <div class="col-12">
             <div class="btn-group w-100 tabs-nav">
-                <button class="btn btn-primary active" onclick="switchTab('chat')">Chat</button>
-                <button class="btn btn-primary" onclick="switchTab('calculation')">Group Outlay</button>
-                <button class="btn btn-primary active" onclick="switchTab('calculation')">Self Outlay</button>
+                <button class="btn btn-primary active" (click)="getChatRoomList('CHAT', 0)">Chat</button>
+                <button class="btn btn-primary" (click)="getChatRoomList('GROUP', 1)">Group Outlay</button>
+                <button class="btn btn-primary active" (click)="getChatRoomList('SELF', 2)">Self Outlay</button>
             </div>
         </div>
     </div>
@@ -19,18 +19,38 @@
         <div class="row chat-container">
             <!-- Left: Member List -->
             <div class="member-list">
-                <h5>Members</h5>
-                <ul class="list-unstyled">
-                    <li class="member-item" onclick="openChat('User 1')">User 1</li>
-                    <li class="member-item" onclick="openChat('User 2')">User 2</li>
-                    <li class="member-item" onclick="openChat('User 3')">User 3</li>
-                </ul>
+                <p-table 
+                    [value]="chatRoomList" 
+                    [scrollable]="true" 
+                    scrollHeight="400px" 
+                    [lazy]="true" 
+                    (onLazyLoad)="getChatRoomList(activeTab==0 ? 'CHAT': activeTab==1 ? 'GROUP' : 'SELF')"
+                    [styleClass]="'chat-table'"
+                    [tableStyle]="{ 'width': '100%' }">
+                    
+                    <!-- <ng-template pTemplate="header">
+                        <tr>
+                        <th>Member Name</th>
+                        <th>Status</th>
+                        </tr>
+                    </ng-template> -->
+                    
+                    <ng-template pTemplate="body" let-roomRow let-rowIndex="rowIndex">
+                        <tr 
+                        [ngClass]="{'highlighted-row': selectedRow === rowIndex}" 
+                        (click)="selectMember(roomRow, rowIndex)">
+                        <td>{{ roomRow.roomName }}</td>
+                        </tr>
+                    </ng-template>
+
+                </p-table>
+
             </div>
 
             <!-- Right: Chat Room -->
             <div class="chat-room">
                 <div class="chat-header" id="chatHeader">
-                    Chat with: <b>User 1</b>
+                    Chat with: {{selectedRoom.roomName}}
                 </div>
 
                 <div class="chat-area" id="chatArea">
@@ -50,7 +70,7 @@
                 <!-- Input Area at the bottom -->
                 <div class="input-area">
                     <input type="text" id="messageInput" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()"/>
-                    <button [disabled]="!message.content || !message.sender" (click)="sendMessage()">Send</button>
+                    <button [disabled]="!selectedRoom || !message.content || !message.sender" (click)="sendMessage()">Send</button>
                 </div>
             </div>
         </div>

@@ -5,6 +5,7 @@ import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { RoomRequest } from '../models/room-request';
 import { PENDING } from '../data';
+import { ChatApiService } from '../services/chat-api.service';
 
 @Component({
   selector: 'app-header',
@@ -12,7 +13,7 @@ import { PENDING } from '../data';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent {
-  user: any;
+  currUser: any;
   visible: boolean = false;
   tabs: { title: string, value: number }[] = [
     { title: 'Requested', value: 1 },
@@ -42,11 +43,14 @@ export class HeaderComponent {
     {username:'e', status: "Deny"},
   ];
 
+  activeIdx: number = 0;
+  requestList: RoomRequest[] = [];
+
   reqUser: User | undefined;
   autoUserList: User[] = [];
 
-  constructor(private webSocketService: WebSocketService, private authService: AuthService, private router: Router){
-    this.user = this.authService.getUserDetails();
+  constructor(private webSocketService: WebSocketService, private authService: AuthService, private chatApiService: ChatApiService, private router: Router){
+    this.currUser = this.authService.getUserDetails();
   }
   
   logout(){
@@ -54,8 +58,9 @@ export class HeaderComponent {
     this.router.navigate(['']);
   }
 
-  addMember(){
-    
+  openRequestDialog(){
+    this.visible=true;
+    this.requests();
   }
 
   searchUsers(event: any) {
@@ -71,19 +76,49 @@ export class HeaderComponent {
     });
   }
   onUserSelect(event: any){
-    this.reqUser = event;
+    this.reqUser = event.value;
   }
   onUserClear(event: any){
     this.reqUser = undefined;
-    console.log("onUserClear---", event);
   }
 
   requestUser(){
-    if(this.reqUser?.id && this.user?.userId){
+    if(this.reqUser?.id && this.currUser?.userId){
       let newRequest: RoomRequest = new RoomRequest();
       newRequest.reqTo = this.reqUser?.id;
-      newRequest.reqFrom = this.user?.userId;
+      newRequest.reqFrom = this.currUser?.userId;
       newRequest.status = PENDING;
+      this.chatApiService.roomRequest(newRequest).subscribe(resp=>{
+        if(resp && resp.status ==200){
+          this.requests();
+          this.reqUser = undefined;
+        }
+      });
+    }
+  }
+
+  requests(receiveFlag: boolean = false){
+    const search: SearchReq = new SearchReq();
+    search.limit=10;
+    search.page =0;
+    search.participant = this.currUser?.userId;
+    receiveFlag = this.activeIdx ? true : false;
+    if(search.participant){
+      this.chatApiService.searchRequestList(search, receiveFlag).subscribe(resp=>{
+        if(resp && resp.status==200 && resp.data?.roomRequest?.dataList){
+          this.requestList=resp.data.roomRequest.dataList;
+        }
+      });
+    }
+  }
+
+  requestAcceptance(reqRow: RoomRequest,acceptFlag: boolean = false){
+    if(reqRow.reqFrom && reqRow.reqTo && this.currUser?.userId){
+      this.chatApiService.roomRequestAcceptance(reqRow, acceptFlag).subscribe(resp=>{
+        if(resp && resp.status ==200){
+          this.requests();
+        }
+      });
     }
   }
 }

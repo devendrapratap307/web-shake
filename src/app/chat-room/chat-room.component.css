@@ -188,3 +188,18 @@
     display: flex; 
     gap: 5px; 
   }
+
+  .highlighted-row {
+    background-color: #d8f3dc !important; /* Light green */
+    color: #1b4332; /* Dark green */
+    font-weight: bold;
+  }
+  
+  .chat-table tr {
+    cursor: pointer;
+  }
+  
+  .chat-table tr:hover {
+    background-color: #f1f1f1; /* Light grey for hover effect */
+  }
+  

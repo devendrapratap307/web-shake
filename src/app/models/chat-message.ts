@@ -3,4 +3,5 @@ export class ChatMessage {
     sender: string | undefined;
     content: string | undefined;
     type: string | undefined;
+    status: string = 'ACT';
 }
