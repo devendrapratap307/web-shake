@@ -38,18 +38,54 @@
         position: relative;
     }
 
-    .chat-header {
+    /* .chat-header {
         background-color: #9999b5;
         color: rgb(5, 5, 5);
         padding: 10px;
         font-weight: bold;
         margin-bottom: 10px; 
+        margin: 1px;
         display: flex;
-        align-items: center; 
-        justify-content: space-between; 
+        align-items:flex-start; 
+        justify-content: flex-start; 
         border-bottom: 1px solid #ccc;
+    } */
+     /* Chat Header Container */
+    .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem; /* Space between icon and text */
+        font-size: 1.2rem; /* Base font size */
+        font-weight: bold; /* Make roomName text bold */
+        padding: 0.5rem 1rem;
+        background-color: #c2c2f7; /*#f8f9fa;  Light background */
+        border-bottom: 1px solid #dee2e6; /* Subtle bottom border */
+        color: #343a40; /* Text color */
     }
 
+    .chat-header i {
+        font-size: 1.5rem; 
+        color: #6c757d; 
+        transition: color 0.3s ease; 
+    }
+
+    .chat-header i.pi-users {
+        color: #007bff; 
+    }
+
+    .chat-header i.pi-user {
+        color: #28a745; 
+    }
+
+    .chat-header i.pi-comments {
+        color: #17a2b8; 
+    }
+
+    .chat-header span {
+        font-size: 1.2rem;
+        color: #495057;
+        text-transform: capitalize; 
+    }
     .chat-area {
         flex: 1;
         overflow-y: auto;
@@ -126,10 +162,67 @@
     color: white;
     margin-left: auto;
     }
+    /* Container for all messages */
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 5px 0;
+    position: relative;
+    max-width: 100%; /* Restrict overall width of messages */
+    word-wrap: break-word; /* Wrap long words */
+    word-break: break-word; /* Break long words */
+  }
+  
+  .message-container.sent {
+    align-items: flex-end;
+  }
+  
+  .message-container.received {
+    align-items: flex-start;
+  }
+  
+  /* Message bubble styling */
+  .message-content {
+    max-width: 100%; /* Prevent overflow */
+    padding: 10px 15px;
+    border-radius: 10px;
+    background-color: #e1ffc7; /* Light green for sent messages */
+    color: #333;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-wrap: anywhere; /* Ensures very long words wrap */
+  }
+  
+  .message-container.sent .message-content {
+    background-color: #cce5ff; /* Light blue for received messages */
+  }
+  
+  /* Timestamp styling */
+  .message-timestamp {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 5px;
+  }
+  
+  /* Optional: Add horizontal scrolling for very large messages */
+  .message-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .message-content::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  .message-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+    
 
     .chat-window {
         width: 100%; /* Full width of the container */
-        height: 500px; /* Fixed height for scrolling */
+        height: 600px; /* Fixed height for scrolling */
         overflow-y: auto; /* Enable vertical scrolling */
         border: 1px solid #ccc; /* Optional: Add a border */
         border-radius: 5px; /* Optional: Rounded corners */
@@ -200,6 +293,50 @@
   }
   
   .chat-table tr:hover {
-    background-color: #f1f1f1; /* Light grey for hover effect */
+    background-color: #977c7c; 
   }
   
+  .scroll-container {
+    height: 400;
+    overflow-y: auto;
+  }
+
+  .avatar {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 35px;         /* Adjust size of the circle */
+        height: 35px;        /* Adjust size of the circle */
+        border-radius: 50%;  /* Make it circular */
+        background-color: #007bff; /* Background color for avatar (can be customized) */
+        color: white;        /* Icon color */
+        font-size: 1.5rem;    /* Adjust icon size */
+        margin-right: 10px;   /* Space between icon and room name */
+    }
+
+    .icon {
+        display: inline-block;
+        font-size: 1.5rem; /* Adjust icon size */
+        color: white;     /* Icon color */
+    }
+
+    .room-name {
+        vertical-align: middle;
+        font-size: 14px;
+    }
+
+    .button-bottom {
+        position:fixed;
+        padding: 10px;
+        bottom: 20px;
+        width: 97%;
+        display: flex;
+        padding: 10px;
+        align-items:flex-end;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+      }

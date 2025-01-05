@@ -51,8 +51,8 @@
                 <span *ngIf="user.confirmPassword && (!isPasswordsMatch()|| !isPasswordValid())" [class]=" isPasswordsMatch() ? 'error-message matched' : 'error-message'">{{isPasswordsMatch() ? 'Password matched.' : 'Password mismatched.'}}</span>
             </div>
             <button type="submit" class="btn btn-primary" [disabled]="!user || !user.email || !user.username || !user.name || !user.password || !user.confirmPassword" (click)="SignUp()">Signup</button>    
-        </div>
-        <p class="mt-3">Already have an account? <a routerLink="" (click)="logging()">Login</a></p>
+            <p class="mt-3">Already have an account? <a routerLink="" (click)="logging()">Login</a></p>
+          </div>
       </ng-container>
     </div>
 </div>

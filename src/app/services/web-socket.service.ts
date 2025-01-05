@@ -17,7 +17,7 @@ export class WebSocketService {
   private connectionSubject = new BehaviorSubject<boolean>(false);
   public connectionStatus$ = this.connectionSubject.asObservable();
 
-  private sharedValue = new BehaviorSubject<number>(0);
+  private sharedValue = new BehaviorSubject<boolean>(false);
   sharedValue$ = this.sharedValue.asObservable();
   public chatRoomValue = new BehaviorSubject<boolean>(false);
   chatRoom$ = this.chatRoomValue.asObservable();
@@ -54,8 +54,8 @@ export class WebSocketService {
           const parsedMessage: ChatMessage = JSON.parse(message.body);
           if(parsedMessage?.content && parsedMessage?.type !='JOIN'){
             this.messageSubject.next(parsedMessage);
-            this.sharedValue.next(this.sharedValue.getValue()+1);
-            console.log("/topic/public-------------------", parsedMessage, this.sharedValue.getValue()+1);
+            this.sharedValue.next(!this.sharedValue.getValue());
+            console.log("/topic/public-------------------", parsedMessage, this.sharedValue.getValue());
           }
         } catch (error) {
           console.error('Error parsing message body:', error);

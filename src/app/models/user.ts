@@ -5,6 +5,8 @@ export class User {
     confirmPassword: string | undefined;
     email: string | undefined;
     name: string |undefined;
+
+    adminFlag: boolean = false; // for group
 }
 
 export class SearchReq {

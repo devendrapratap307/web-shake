@@ -20,6 +20,11 @@ import { TabViewModule } from 'primeng/tabview';
 import { TabMenuModule } from 'primeng/tabmenu';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { SidebarModule } from 'primeng/sidebar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TagModule } from 'primeng/tag';
+import { CheckboxModule } from 'primeng/checkbox';
 @NgModule({
   declarations: [
     AppComponent,
@@ -42,8 +47,12 @@ import { ToastModule } from 'primeng/toast';
     TabViewModule,
     TabMenuModule,
     TableModule,
-    ToastModule
-
+    ToastModule,
+    OverlayPanelModule,
+    SidebarModule,
+    ProgressSpinnerModule,
+    TagModule,
+    CheckboxModule
   ],
   providers: [
     {
