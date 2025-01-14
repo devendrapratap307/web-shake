@@ -1,75 +1,103 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Client, Message, Stomp } from '@stomp/stompjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import * as SockJS from 'sockjs-client';
 import { JWT_TOKEN } from '../data';
 import { ChatMessage } from '../models/chat-message';
 import { jwtDecode } from 'jwt-decode';
+import { ChatRoom } from '../models/chat-room';
+import { Router } from '@angular/router';
+import { OnlineStatus } from '../models/user';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WebSocketService {
+  router = inject(Router);
   private stompClient: Client | null = null;
   private messageSubject = new Subject<any>();
   public messages$ = this.messageSubject.asObservable();
+
+  private msgNotifySubject = new Subject<any>();
+  public msgNotify$ = this.msgNotifySubject.asObservable();
+  private onlineStatusSubject = new Subject<OnlineStatus>();
+  public onlineStatus$ = this.onlineStatusSubject.asObservable();
 
   private connectionSubject = new BehaviorSubject<boolean>(false);
   public connectionStatus$ = this.connectionSubject.asObservable();
 
   private sharedValue = new BehaviorSubject<boolean>(false);
   sharedValue$ = this.sharedValue.asObservable();
-  public chatRoomValue = new BehaviorSubject<boolean>(false);
-  chatRoom$ = this.chatRoomValue.asObservable();
+  currUserId?: string;
+
+  private subscriptions: Map<string, { unsubscribe: () => void }> = new Map();
 
   constructor() {}
-  connect(roomId: string, username?: string): void {
-    if (this.stompClient && this.stompClient.connected){
-      this.disconnect();
-    }
+  connect(): void {
+    // if (this.stompClient && this.stompClient.connected){
+    //   this.disconnect();
+    // }
     const token = localStorage.getItem(JWT_TOKEN);  
     if (!token) {
       console.error('No JWT token found. Cannot connect.');
+      this.router.navigate(['']);
       return; 
+    } else {
+      const userData = jwtDecode(token);
+      this.currUserId = userData?.userId;
     }
-    const socket = new SockJS('http://localhost:7076/ws');
+    const socket = new SockJS('http://localhost:7076/ws'+`?token=${token}`, null, {
+      transports: ['websocket'], // Exclude 'jsonp'
+    });
+  
+    
 
     this.stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 1000, // Retry connection after delay if disconnected
       debug: (str) => console.log(`[STOMP DEBUG]: ${str}`),
-      // connectHeaders: {
-      //   Authorization: `Bearer ${token}`,  // Pass JWT token in headers for WebSocket connection
-      // },
+      connectHeaders: {
+        'Authorization': `Bearer ${token}`, // Attach JWT token in the headers
+        // 'username': username,
+        // 'roomId': roomId
+        'userId': this.currUserId ? this.currUserId : ''
+      }
     });
 
-    // Handle successful connection
+  
     this.stompClient.onConnect = () => {
       console.log('Connected to WebSocket.');
       this.connectionSubject.next(true);
+      // Send connection message to the backend
+      if (this.stompClient && this.stompClient.connected && this.currUserId){
+        this.stompClient.publish({
+          destination: '/app/connect',  
+          body: JSON.stringify({ userId: this.currUserId})
+        });
+        this.subscribeToPrivateTopic(this.currUserId);
+      }
 
       // Subscribe to the topic
-      this.stompClient?.subscribe('/topic/public/'+roomId, (message: Message) => {
-        try {
-          const parsedMessage: ChatMessage = JSON.parse(message.body);
-          if(parsedMessage?.content && parsedMessage?.type !='JOIN'){
-            this.messageSubject.next(parsedMessage);
-            this.sharedValue.next(!this.sharedValue.getValue());
-            console.log("/topic/public-------------------", parsedMessage, this.sharedValue.getValue());
-          }
-        } catch (error) {
-          console.error('Error parsing message body:', error);
-        }
-      });
+      // this.stompClient?.subscribe('/topic/public/'+roomId, (message: Message) => {
+      //   try {
+      //     const parsedMessage: ChatMessage = JSON.parse(message.body);
+      //     if(parsedMessage?.content && parsedMessage?.type !='JOIN'){
+      //       this.messageSubject.next(parsedMessage);
+      //       this.sharedValue.next(!this.sharedValue.getValue());
+      //       console.log("/topic/public-------------------", parsedMessage, this.sharedValue.getValue());
+      //     }
+      //   } catch (error) {
+      //     console.error('Error parsing message body:', error);
+      //   }
+      // });
 
       // Notify the server of a new user joining
-      if (token) {
-        const userData = jwtDecode(token);
-        if(userData?.userId){
-          this.sendMessage(roomId, userData.userId, '', 'JOIN');
-        }
-      
-      }
+      // if (token) {
+      //   const userData = jwtDecode(token);
+      //   if(userData?.userId){
+      //     this.sendMessage(roomId, userData.userId, '', 'JOIN');
+      //   }
+      // }
     };
 
     // Handle STOMP errors
@@ -82,12 +110,54 @@ export class WebSocketService {
     this.stompClient.activate();
   }
 
-  /**
-   * Sends a message to the WebSocket server.
-   * @param username The sender's username.
-   * @param content The message content.
-   * @param type The type of message ('CHAT', 'JOIN', etc.).
-   */
+  subscribeChatRoom(roomId: string){
+    if (this.stompClient && this.stompClient.connected && roomId){
+      const subscription = this.stompClient?.subscribe('/topic/public/'+roomId, (message: Message) => {
+        try {
+          const parsedMessage: ChatMessage = JSON.parse(message.body);
+          if(parsedMessage?.content && parsedMessage?.type !='JOIN'){
+            this.messageSubject.next(parsedMessage);
+            this.sharedValue.next(!this.sharedValue.getValue());
+            console.log("/topic/public-------------------", parsedMessage, this.sharedValue.getValue());
+          }
+        } catch (error) {
+          console.error('Error parsing message body:', error);
+        }
+      });
+      this.subscriptions.set('/topic/public/'+roomId, subscription);
+    }
+  }
+
+  unsubscribeOtherChatRoom(roomId: string): void {
+    if(roomId){
+      const currTopic = '/topic/public/'+roomId;
+      if(this.subscriptions){
+        this.subscriptions.forEach((value, key) =>{
+          if(key != currTopic && value){
+            value.unsubscribe();
+            this.subscriptions.delete(key);
+          }
+        })
+      }
+    }
+  }
+
+  unsubscribeCurrentChatRoom(roomId: string): void{
+    if(roomId){
+      const currTopic = '/topic/public/'+roomId;
+      if(this.subscriptions.has(currTopic)){
+        const subscription = this.subscriptions.get('/topic/public/'+roomId);
+        if (subscription) {
+          subscription.unsubscribe(); 
+          this.subscriptions.delete(currTopic);
+          console.log(`Unsubscribed from topic: ${currTopic}`);
+        } else {
+          console.error(`No subscription found for topic: ${currTopic}`);
+        }
+      }
+    }
+  }
+
   sendMessage(roomId: string | undefined, username: string | undefined, content: string | undefined, type: string = 'CHAT'): void {
     if (this.stompClient && this.stompClient.connected) {
       const message: ChatMessage = new ChatMessage();// { sender: username, content: content, type: type };
@@ -100,37 +170,42 @@ export class WebSocketService {
           destination: '/app/chat.sendMessage/'+roomId,
           body: JSON.stringify(message),
         });
+        // console.log("publish-Msg==============", roomId, this.stompClient.connected,  this.messagesMap.get(roomId));
       }
-    } 
-    // else {
-    //   console.error('Cannot send message: WebSocket is not connected.');
-    //   setTimeout(()=>{
-    //     this.connect();
-    //   }, 300);
-    // }
+    } else {
+      console.error("websocket disconnected...");
+      setTimeout(()=>{
+        this.connect();
+      }, 300);
+    }
   }
 
-  /**
-   * Returns an observable for messages received from the server.
-   */
   getMessages(): Observable<any> {
     return this.messages$;
   }
 
-
-  subscribeToMessages(chatRoomId: string): Observable<any> {
-    return new Observable((subscriber) => {
-      if (this.stompClient && this.stompClient.connected){
-        this.stompClient.subscribe(`/topic/${chatRoomId}`, (message: any) => {
-          subscriber.next(JSON.parse(message.body));
-        });
-      }
-    });
+  getNotification(): Observable<any> {
+    return this.msgNotify$;
   }
 
-  /**
-   * Disconnects from the WebSocket server.
-   */
+  subscribeToPrivateTopic(userId: string) {
+    if (this.stompClient && this.stompClient.connected && userId){
+      this.stompClient.subscribe(`/topic/private/${userId}`, (message: Message) => {
+        const messageBody = JSON.parse(message.body);
+        this.msgNotifySubject.next(messageBody);
+      });
+    }
+  }
+
+  onlineStatus(userId: string) {
+    if (this.stompClient && this.stompClient.connected && userId){
+      this.stompClient.subscribe(`/topic/online-status/${userId}`, (message: Message) => {
+        const messageBody = JSON.parse(message.body);
+        this.onlineStatusSubject.next(messageBody);
+      });
+    }
+  }
+
   disconnect(): void {
     if (this.stompClient) {
       this.stompClient.deactivate();
@@ -141,6 +216,34 @@ export class WebSocketService {
 }
 
 
+ //   this.client = new Client({
+  //     brokerURL: 'ws://localhost:8080/ws', // WebSocket URL
+  //     connectHeaders: {
+  //       'Authorization': `Bearer ${jwtToken}`, // Attach JWT token in the headers
+  //       'sender': username,
+  //       'roomId': roomId
+  //     },
+  //     debug: (msg) => {
+  //       console.log(msg);
+  //     },
+  //     onConnect: (frame) => {
+  //       console.log('Connected:', frame);
+  //       // You can subscribe to topics after the connection is established
+  //       this.client.subscribe('/topic/someTopic', (message) => {
+  //         this.handleMessage(message);
+  //       });
+  //     },
+  //     onDisconnect: () => {
+  //       console.log('Disconnected');
+  //     },
+  //     onStompError: (error) => {
+  //       console.error('Error:', error);
+  //     },
+  //     webSocketFactory: () => new SockJS('http://localhost:8080/ws') // SockJS connection for fallback
+  //   });
+
+  //   this.client.activate();  // Activate the WebSocket connection
+  // }
 
 
 

@@ -1,5 +1,9 @@
 <div class="chat-header">
-    Web Shake ({{currUser?.sub}})
+    <span class="header-title">Web Shake ({{currUser?.sub}})
+        <div class="status-container">
+            <div class="status-indicator" [ngClass]="{'online': isOnline, 'offline': !isOnline}"></div>
+        </div>
+    </span>
     <div class="button-group">
         <p-button icon="pi pi-plus" label="Group" [raised]="true" (onClick)="openGroup()"></p-button>
         <p-button icon="pi pi-external-link" label="Requests" [raised]="true" (onClick)="openRequestDialog()"></p-button>

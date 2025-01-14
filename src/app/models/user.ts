@@ -23,3 +23,8 @@ export class SearchReq {
     roomId: string | undefined;
     
 }
+
+export class OnlineStatus{
+    userId?: string;
+    onlineFlag?: boolean;
+}

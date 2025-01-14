@@ -1,7 +1,6 @@
 <p-toast />
-<app-header></app-header>
+<app-header [isOnline]="isConnected"></app-header>
 <!-- <p-tabMenu [model]="tabList" [activeItem]="activeItem" (activeItemChange)="onTabChange($event)"/> -->
-
   <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -34,7 +33,12 @@
                                 <div class="avatar">
                                     <i [class]="roomRow.iconClass || (roomRow.type =='GROUP' ? 'pi pi-users' : 'pi pi-user')" class="icon"></i>
                                 </div>
-                                <span class="room-name">{{ roomRow.roomName }}</span>
+                                <span class="room-name">{{ roomRow.roomName }} {{roomRow.type=='SELF' ? ' (Me)' : ''}}</span>
+                                <p-badge *ngIf="notifyMsg(roomRow.id)" [value]="notifyMsg(roomRow.id)" severity="success" />
+                                <ng-container *ngIf="roomRow.type=='CHAT'">
+                                    {{onlineStatus(roomRow) ? 'online' : 'offline'}}
+                                </ng-container>
+                                <!-- {{messagesForRoom(roomRow.id) | json}} -->
                             </td>
                             </tr>
                         </ng-template>
@@ -46,29 +50,22 @@
             <div class="chat-room">
                 <div class="chat-header" id="chatHeader">
                     <i [class]="selectedRoom.type=='GROUP' ? 'pi pi-users' : selectedRoom.type=='CHAT' ? 'pi pi-user' : selectedRoom.type=='SELF' ? 'pi pi-comments' : 'pi pi-info-circle'"></i> 
-                     {{selectedRoom.roomName}} 
+                     {{selectedRoom.roomName}}  {{selectedRoom.type=='SELF' ? ' (Me)' : ''}} 
+                     <!-- {{selectedRoom.id ? (messagesForRoom(selectedRoom.id) | json) :''}} -->
                      <i *ngIf="selectedRoom && selectedRoom.type=='GROUP'" class="pi pi-external-link" (click)="openSide()"></i>
                 </div>
 
                 <div class="chat-area" id="chatArea">
                     <div cdkScrollable #chatWindow class="chat-window" (scroll)="onScroll($event)">
                         <ng-container *ngFor="let msg of messages">
-                            <!-- <small class="message-timestamp">{{ msg.timeStamp | date: 'shortTime' }}</small>
-                            <div [class]="msg.sender == message.sender ? 'message sent' : 'message'">
-                                  {{ msg.content }}
-                            </div>    -->
-                            <!-- <div class="message-container" [ngClass]="{'sent': msg.sender == message.sender, 'received': msg.sender != message.sender}">
-                                <div class="message-content">
-                                  <p>{{ msg.content }}</p>
-                                </div>
-                                <small class="message-timestamp">{{ msg.timeStamp | date: 'shortTime' }}</small>
-                            </div> -->
                             <div class="message-container" 
                                 [ngClass]="{'sent': msg.sender == message.sender, 'received': msg.sender != message.sender}">
                                 <div class="message-content">
+                                    <p *ngIf="selectedRoom?.type=='GROUP'" class="sender-name">{{msg?.senderName}}</p>
                                     <p>{{ msg.content }}</p>
                                 </div>
-                                <small class="message-timestamp">{{ msg.timeStamp | date: 'shortTime' }}</small>
+                                <small class="message-timestamp">{{ msg.timeStamp | ownDate }}</small>
+
                             </div>
                         </ng-container>
                     </div>
@@ -79,6 +76,7 @@
                     <p *ngIf="selectedRoom.onlyAdmin && !roomAdminCheck()">Only admin can send messages</p>
                     <ng-container *ngIf="!selectedRoom.onlyAdmin || roomAdminCheck()">
                         <input type="text" id="messageInput" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()" [disabled]="!selectedRoom || !selectedRoom.id"/>
+                        <app-emoji-picker-wrapper (emojiSelect)="onEmojiClick($event)"></app-emoji-picker-wrapper>
                         <button [disabled]="!selectedRoom || !selectedRoom.id || !message.content || !message.sender" (click)="sendMessage()">Send</button>
                     </ng-container>
                 </div>

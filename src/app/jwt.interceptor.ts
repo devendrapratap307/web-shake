@@ -3,25 +3,25 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpInterceptor
+  HttpInterceptor,
+  HttpErrorResponse
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { JWT_TOKEN } from './data';
+import { AuthService } from './services/auth.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
 
-  constructor() {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('jwtToken'); // Retrieve JWT token
-
+    const token = this.authService.getToken();//localStorage.getItem(JWT_TOKEN); // Retrieve JWT token
     if (token) {
-      // Decode the token to extract user data
       const decodedToken: any = jwtDecode(token);
       console.log('User Data from Token:', decodedToken);
-
-      // Add the token to the Authorization header for API requests
       const clonedRequest = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
@@ -29,7 +29,16 @@ export class JwtInterceptor implements HttpInterceptor {
       });
       return next.handle(clonedRequest);
     }
-
+    return next.handle(req).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          // Handle unauthorized error (e.g., redirect to login)
+          this.authService.removeToken();
+          this.router.navigate(['']);
+        }
+        return throwError(error);
+      })
+    );
     return next.handle(req);
   }
 }

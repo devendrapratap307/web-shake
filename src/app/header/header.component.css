@@ -6,13 +6,14 @@
     margin-bottom: 10px; 
     display: flex;
     align-items: center; 
-    justify-content: space-between; 
+    justify-content:space-between; 
     border-bottom: 1px solid #ccc;
 }
 
 .button-group {
     display: flex; 
     gap: 5px; 
+    justify-content:right;
   }
 
   .empty-state {
@@ -133,5 +134,72 @@
   .text-end {
     text-align: right;
   }
+
+
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: gray; /* Default state (offline) */
+  }
+  
+  .status-indicator.online {
+    background-color: green; /* Online state */
+  }
+  
+  .status-indicator.offline {
+    background-color: red; /* Offline state */
+  }
+
+
+
+
+
+
+
+
+  .chat-header {
+    background-color: #9999b5;
+    color: rgb(5, 5, 5);
+    padding: 10px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center; /* Align vertically */
+    justify-content: space-between; /* Space between items */
+    border-bottom: 1px solid #ccc;
+}
+
+.header-title {
+    flex: 1; /* Take all available space on the left */
+    display: flex;
+    align-items: center;
+}
+
+.status-container {
+    margin-right: 10px; /* Space between the name and status indicator */
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: gray; /* Default state (offline) */
+}
+
+.status-indicator.online {
+    background-color: green; /* Online state */
+}
+
+.status-indicator.offline {
+    background-color: red; /* Offline state */
+}
+
+.button-group {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    justify-content: flex-end; /* Align buttons to the right */
+}
+
   
   

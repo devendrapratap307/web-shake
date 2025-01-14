@@ -204,8 +204,13 @@
     color: #aaa;
     margin-top: 5px;
   }
-  
-  /* Optional: Add horizontal scrolling for very large messages */
+
+  .sender-name {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px; 
+    color: #007bff; 
+}
   .message-content::-webkit-scrollbar {
     width: 6px;
   }
@@ -339,4 +344,13 @@
         color: red;
         font-size: 12px;
         margin-top: 5px;
+      }     
+      
+      emoji-picker {
+        position: absolute;
+        bottom: 60px;
+        right: 20px;
+        z-index: 9999;
       }
+      
+      

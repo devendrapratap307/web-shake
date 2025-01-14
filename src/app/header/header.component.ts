@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { WebSocketService } from '../services/web-socket.service';
 import { SearchReq, User } from '../models/user';
 import { AuthService } from '../services/auth.service';
@@ -30,6 +30,7 @@ export class HeaderComponent {
 
   reqUser: User | undefined;
   autoUserList: User[] = [];
+  @Input() isOnline: boolean= false;
 
   constructor(private webSocketService: WebSocketService, private authService: AuthService, private chatApiService: ChatApiService, private router: Router, private loaderService: LoaderService){
     this.currUser = this.authService.getUserDetails();
@@ -38,6 +39,7 @@ export class HeaderComponent {
   logout(){
     this.authService.removeToken();
     this.router.navigate(['']);
+    this.webSocketService.disconnect();
   }
 
   openRequestDialog(){

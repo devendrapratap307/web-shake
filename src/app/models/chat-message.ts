@@ -5,4 +5,5 @@ export class ChatMessage {
     type: string | undefined;
     status: string = 'ACT';
     timeStamp?: Date;
+    senderName: string | undefined;
 }

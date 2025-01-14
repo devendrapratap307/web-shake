@@ -1,11 +1,11 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { WebSocketService } from '../services/web-socket.service';
 import { ChatApiService } from '../services/chat-api.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { ChatMessage } from '../models/chat-message';
 import { MenuItem, MessageService } from 'primeng/api';
-import { SearchReq } from '../models/user';
+import { OnlineStatus, SearchReq } from '../models/user';
 import { ChatRoom } from '../models/chat-room';
 import { Subscription } from 'rxjs';
 import { LoaderService } from '../services/loader.service';
@@ -17,10 +17,12 @@ import { ROOM_TYPE_CHAT } from '../data';
   styleUrls: ['./chat-room.component.css'],
   providers: [MessageService]
 })
-export class ChatRoomComponent implements OnInit{
+export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
   @ViewChild('chatWindow') chatWindow!: ElementRef; 
   roomMsgMap: Map<string, string[]> = new Map();
-  messages: ChatMessage[] = [];
+  messages: ChatMessage[] | any[] = [];
+  msgNotifications: ChatMessage[] | any[] = [];
+  onlineStatusList: OnlineStatus[] = [];
   message: ChatMessage = new ChatMessage();
   isConnected: boolean = false;
   connectingMessage: string = '';
@@ -33,6 +35,8 @@ export class ChatRoomComponent implements OnInit{
   roomErrorList: string[] = [];
   subscription: Subscription | null = null;
   sideFlag: boolean = false;
+  sentFlag: boolean = false;
+  subscribedUsers: string[] = [];
 
   totalMsg: number = 0;
   page = 0;
@@ -69,34 +73,98 @@ export class ChatRoomComponent implements OnInit{
     this.connectWebSocket();
   }
 
+  ngOnDestroy(): void {
+    // this.webSocketService.disconnect();
+  }
+
+  ngAfterViewInit(): void {
+  }
+
   connectWebSocket(){
     this.messages = [];
     this.page = 0;
     this.totalMsg=0;
 
+    this.webSocketService.connect();
+    this.webSocketService.connectionStatus$.subscribe(connected =>{
+      this.isConnected = connected;
+      if(connected){
+        this.connectingMessage = '';
+        console.log("Connection established...");
+      }
+    });
+    this.subscribeNewMessage();
+    this.subscribeMsgNotification();
+    this.subscribeStatus();
+  }
+
+  subscribeNewMessage(){
     if(this.message.sender && this.selectedRoom && this.selectedRoom.id){
-      this.webSocketService.connect(this.selectedRoom.id, this.message.sender);
+      // this.webSocketService.connect(this.selectedRoom.id, this.message.sender);
       this.subscription = this.webSocketService.messages$.subscribe((message) => {
           if (message && message !='') {
             this.messages.push(message);
           }
       });
-      this.webSocketService.connectionStatus$.subscribe(connected =>{
-        this.isConnected = connected;
-        if(connected){
-          this.connectingMessage = '';
-          console.log("Connection established...");
-        }
-      });
+      
       // this.loadMessages(); // Initial load
       // this.subscribeToWebSocket();
       this.webSocketService.sharedValue$.subscribe((newValue) => {
-        if(this.currScrollValue != newValue){
-          this.scrollToBottom();
+        console.log('############sharedValue############################', this.currScrollValue, newValue);
+        if(this.currScrollValue !== newValue){
           this.currScrollValue = newValue;
+          this.scrollToBottom();
         } 
       });
     }
+  }
+
+  subscribeMsgNotification(){
+    if(this.message.sender){
+      this.webSocketService.msgNotify$.subscribe((msgNotification) => {
+          if (msgNotification && msgNotification !='') {
+            this.msgNotifications.push(msgNotification);
+            if(this.selectedRoom?.id){
+              this.clearNotification(this.selectedRoom.id);
+            }
+          }
+      });
+    }
+  }
+
+  subscribeStatus(){
+    if(this.message.sender){
+      this.webSocketService.onlineStatus$.subscribe((oStatus) => {
+        const onlineStatus: OnlineStatus = oStatus;
+          if (onlineStatus && onlineStatus.userId) {
+            if(this.onlineStatusList?.length){
+              this.onlineStatusList = this.onlineStatusList.filter(online=> online?.userId &&  online.userId != onlineStatus.userId);
+            } else {
+              this.onlineStatusList = [];
+            }
+            this.onlineStatusList.push(onlineStatus);
+          }
+      });
+    }
+  }
+
+  onlineStatus(chatRoom: ChatRoom):boolean{
+    let onlineFlag: boolean = false;
+    if(chatRoom && this.currUser?.userId){
+      let memberId: string| undefined = undefined;
+      for(let pts of chatRoom.participants){
+        if(pts?.id && pts.id != this.currUser?.userId){
+          memberId = pts.id;
+          break;
+        }
+      }
+      if(memberId){
+        if(this.onlineStatusList?.length){
+          onlineFlag = this.onlineStatusList.some(status => status.userId && status.userId == memberId && status.onlineFlag);
+        }
+      }
+    }
+    return onlineFlag;
   }
 
   onTabChange(event: MenuItem) {
@@ -114,11 +182,13 @@ export class ChatRoomComponent implements OnInit{
   }
 
   sendMessage() {
-    if(this.selectedRoom && this.selectedRoom?.id, this.message.content && this.message.sender){
+    if(this.selectedRoom && this.selectedRoom?.id && this.message.content && this.message.sender && !this.sentFlag){
+      this.sentFlag=true;
       this.message.roomId = this.selectedRoom?.id;
       this.webSocketService.sendMessage(this.message.roomId, this.message.sender, this.message.content);
       this.message.content = '';
       this.scrollToBottom();
+      this.sentFlag=false;
     }
   }
 
@@ -131,35 +201,46 @@ export class ChatRoomComponent implements OnInit{
 
   
   loadMessages() {
+    console.log("==loadMessages====================", this.loading, this.selectedRoom.id, this.totalMsg, this.page,this.size)
     if (this.loading) return;
-    this.loading = true;
-    if(this.selectedRoom.id && (!this.totalMsg || (this.totalMsg > (this.page+1)*this.size))){
+    
+    if(this.selectedRoom.id && (!this.totalMsg || (this.totalMsg > (this.page)*this.size))){
       this.loaderService.loader(true);
+      this.loading = true;
       this.chatApiService.getMessages(this.selectedRoom.id, this.page, this.size).subscribe((reponse) => {
         if(reponse && reponse.status ==200 && reponse.data && reponse.data?.roomMessage?.dataList?.length){
           let newMessages: ChatMessage[] = reponse.data.roomMessage.dataList;
           newMessages = newMessages.filter(msg => msg && msg?.content);
           if(newMessages){
-            this.messages = [...(newMessages), ...this.messages];
+            this.messages = [...(newMessages.reverse()), ...this.messages];
           }
           this.totalMsg = reponse.data.roomMessage.totalRow;
+          if(!this.page){
+            this.scrollToBottom();
+          }
+          this.page++;
         }
-        this.page++;
         this.loading = false;
         this.loaderService.loader(false);
-      });
+      },
+      (error)=>{
+        this.loading = false;
+        this.loaderService.loader(false);
+      }
+     );
     }
   }
 
-  subscribeToWebSocket() {
-    if(this.selectedRoom.id){
-      this.webSocketService.subscribeToMessages(this.selectedRoom.id).subscribe((message) => {
-        this.messages.push(message);
-      });
-    }
-  }
+  // subscribeToWebSocket() {
+  //   if(this.selectedRoom.id){
+  //     this.webSocketService.subscribeToMessages(this.selectedRoom.id).subscribe((message) => {
+  //       this.messages.push(message);
+  //     });
+  //   }
+  // }
 
   scrollToBottom(): void {
+    console.log("###############################", this.selectedRoom.id, this.selectedRoom);
     try {
       setTimeout(() => {
         const chatWindow = this.chatWindow.nativeElement;
@@ -184,7 +265,7 @@ export class ChatRoomComponent implements OnInit{
     const scrollPosition = target.scrollTop + target.clientHeight;
     const scrollHeight = target.scrollHeight;
     if (scrollPosition >= scrollHeight - 10) {
-      if((this.currentPage +1) * this.rowsPerPage < this.totalRooms){
+      if(this.currentPage * this.rowsPerPage < this.totalRooms){
         this.getChatRoomList(undefined, this.currentPage +1);
       }
     }
@@ -214,12 +295,28 @@ export class ChatRoomComponent implements OnInit{
             this.chatRoomList = this.chatRoomList.filter((room, index, self) => {
                 return index === self.findIndex((r) => r.id === room.id);
             });
+            ;
+            this.chatRoomList.forEach(room=>{
+              if(room.participants?.length){
+                room.participants.forEach(pts=>{
+                  if(pts && pts.id && pts.id != this.currUser?.userId && !this.subscribedUsers.includes(pts.id)){
+                    this.subscribedUsers.push(pts.id);
+                    this.webSocketService.onlineStatus(pts.id);
+                  }
+                })
+              }
+            })
           }
           this.totalRooms = resp.data.chatRoom.totalRow || this.totalRooms;
           this.currentPage = resp.data?.chatRoom?.pageCount ? resp.data.chatRoom.pageCount :0;
         }
         this.loaderService.loader(false);
-      });
+      }
+      ,
+      (error)=>{
+        this.loaderService.loader(false);
+      }
+    );
     }
   }
 
@@ -273,16 +370,42 @@ export class ChatRoomComponent implements OnInit{
     this.selectedRow = index;
     this.message.roomId = currRoom.id;
     this.selectedRoom = currRoom;
+
     this.page =0;
     this.totalMsg =0;
-    this.destroySubscription();
-    this.connectWebSocket();
     this.messages = [];
+
+    this.destroySubscription();
+    if(this.selectedRoom?.id){
+      this.webSocketService.unsubscribeOtherChatRoom(this.selectedRoom.id);
+      this.webSocketService.subscribeChatRoom(this.selectedRoom.id);
+      this.clearNotification(this.selectedRoom.id);
+    }
+    this.subscribeNewMessage();
     this.loadMessages();
     console.log('Selected selectedRoom:', currRoom);
-
-    // Add logic to open chat or load messages
   }
+
+  notifyMsg(roomId: string): string {
+    let msgCount: number = 0;
+    if(roomId){
+      if(this.msgNotifications.length && this.currUser && this.currUser.userId){
+        this.msgNotifications.forEach(msgNote=>{
+          if(msgNote && msgNote.content && msgNote.sender && msgNote.sender !=this.currUser.userId && msgNote.roomId == roomId){
+            msgCount++;
+          }
+        })
+      }
+    }
+    return msgCount ? msgCount+'' : '';
+  }
+
+  clearNotification(roomId: string){
+    if(roomId && this.msgNotifications.length){
+      this.msgNotifications = this.msgNotifications.filter(notes => notes?.roomId !=roomId);
+    }
+  }
+
   
   openSide(){
     this.sideFlag = true;
@@ -323,5 +446,15 @@ export class ChatRoomComponent implements OnInit{
       });
     }
   }
+
+  onEmojiClick(event: any) {
+    if(this.selectedRoom.id && event){
+      if(!this.message.content){
+        this.message.content = '';
+      }
+      this.message.content += event;
+    }
+  }
+
 
 }

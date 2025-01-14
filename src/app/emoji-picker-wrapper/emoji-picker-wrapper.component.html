@@ -1,0 +1,4 @@
+<button class="emoji-button" (click)="togglePicker()">😊</button>
+<div *ngIf="isPickerVisible" id="emoji-picker-container" class="emoji-picker-container">
+  <emoji-picker (emoji-click)="onEmojiClick($event)"></emoji-picker>
+</div>

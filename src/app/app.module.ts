@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -25,6 +25,9 @@ import { SidebarModule } from 'primeng/sidebar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
 import { CheckboxModule } from 'primeng/checkbox';
+import { BadgeModule } from 'primeng/badge';
+import { OwnDatePipe } from './own-date.pipe';
+import { EmojiPickerWrapperComponent } from './emoji-picker-wrapper/emoji-picker-wrapper.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -32,7 +35,9 @@ import { CheckboxModule } from 'primeng/checkbox';
     AuthComponent,
     LoaderComponent,
     PageNotFoundComponent,
-    HeaderComponent
+    HeaderComponent,
+    OwnDatePipe,
+    EmojiPickerWrapperComponent
   ],
   imports: [
     BrowserModule,
@@ -52,7 +57,8 @@ import { CheckboxModule } from 'primeng/checkbox';
     SidebarModule,
     ProgressSpinnerModule,
     TagModule,
-    CheckboxModule
+    CheckboxModule,
+    BadgeModule
   ],
   providers: [
     {
@@ -61,6 +67,7 @@ import { CheckboxModule } from 'primeng/checkbox';
       multi: true,
     },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }
