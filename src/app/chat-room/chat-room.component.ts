@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { WebSocketService } from '../services/web-socket.service';
 import { ChatApiService } from '../services/chat-api.service';
 import { AuthService } from '../services/auth.service';
@@ -45,22 +45,23 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
   currScrollValue: boolean = false;
   
   activeTab: number = 0;
-  activeItem: MenuItem | undefined;
+  // activeItem: MenuItem | undefined;
   tabList: MenuItem[] =  [
-    { label: 'Chat', code: 'CHAT', icon: 'pi pi-comments' },
-    { label: 'Group Outlay', code: 'GROUP', icon: 'pi pi-users' },
-    { label: 'Self Outlay', code: 'SELF', icon: 'pi pi-user' }
+    { label: 'Chat', id: 'CHAT', icon: 'pi pi-comments' },
+    { label: 'Group Outlay', id: 'GROUP', icon: 'pi pi-users' },
+    { label: 'Self Outlay', id: 'SELF', icon: 'pi pi-user' }
   ];
+  router = inject(Router);
 
 
   totalRooms: number =0;
   rowsPerPage = 20; 
   currentPage = 0; 
 
-  constructor(private webSocketService: WebSocketService, private chatApiService: ChatApiService, private authService: AuthService, private router: Router, private messageService: MessageService, private loaderService: LoaderService) {}
+  constructor(private webSocketService: WebSocketService, private chatApiService: ChatApiService, private authService: AuthService, private messageService: MessageService, private loaderService: LoaderService) {}
 
   ngOnInit() {
-    this.activeItem = this.tabList[0];
+    // this.activeItem = this.tabList[0];
     this.currUser = this.authService.getUserDetails();
     console.log("###=================",this.currUser);
     if(this.currUser?.userId){
@@ -167,13 +168,13 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
     return onlineFlag;
   }
 
-  onTabChange(event: MenuItem) {
-    this.activeItem = event;
-    this.selectedRoom = new ChatRoom();
-    if(this.activeItem && this.activeItem.code){
-      this.getChatRoomList(this.activeItem.code);
-    }
-  }
+  // onTabChange(event: MenuItem) {
+  //   // this.activeItem = event;
+  //   // this.selectedRoom = new ChatRoom();
+  //   // if(this.activeItem && this.activeItem.id){
+  //   //   this.getChatRoomList(this.activeItem.id);
+  //   // }
+  // }
 
   destroySubscription(){
     if (this.subscription) {

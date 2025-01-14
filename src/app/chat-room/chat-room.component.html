@@ -35,9 +35,9 @@
                                 </div>
                                 <span class="room-name">{{ roomRow.roomName }} {{roomRow.type=='SELF' ? ' (Me)' : ''}}</span>
                                 <p-badge *ngIf="notifyMsg(roomRow.id)" [value]="notifyMsg(roomRow.id)" severity="success" />
-                                <ng-container *ngIf="roomRow.type=='CHAT'">
+                                <!-- <ng-container *ngIf="roomRow.type=='CHAT'">
                                     {{onlineStatus(roomRow) ? 'online' : 'offline'}}
-                                </ng-container>
+                                </ng-container> -->
                                 <!-- {{messagesForRoom(roomRow.id) | json}} -->
                             </td>
                             </tr>

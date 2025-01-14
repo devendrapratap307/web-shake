@@ -55,7 +55,7 @@ export class WebSocketService {
     this.stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 1000, // Retry connection after delay if disconnected
-      debug: (str) => console.log(`[STOMP DEBUG]: ${str}`),
+      debug: (str: any) => console.log(`[STOMP DEBUG]: ${str}`),
       connectHeaders: {
         'Authorization': `Bearer ${token}`, // Attach JWT token in the headers
         // 'username': username,
