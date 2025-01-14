@@ -11,7 +11,7 @@
             </div>
         </div>
     </div>
-
+{{this.onlineStatusList | json}}##
     <!-- Chat Tab -->
     <div class="tab-content chat-tab" id="chatTab" style="display: block;">
         <div class="row chat-container">
@@ -35,9 +35,9 @@
                                 </div>
                                 <span class="room-name">{{ roomRow.roomName }} {{roomRow.type=='SELF' ? ' (Me)' : ''}}</span>
                                 <p-badge *ngIf="notifyMsg(roomRow.id)" [value]="notifyMsg(roomRow.id)" severity="success" />
-                                <!-- <ng-container *ngIf="roomRow.type=='CHAT'">
+                                <ng-container *ngIf="roomRow.type=='CHAT'" style="color: green;">
                                     {{onlineStatus(roomRow) ? 'online' : 'offline'}}
-                                </ng-container> -->
+                                </ng-container>
                                 <!-- {{messagesForRoom(roomRow.id) | json}} -->
                             </td>
                             </tr>

@@ -92,6 +92,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
       if(connected){
         this.connectingMessage = '';
         console.log("Connection established...");
+        this.subscribeStatusWeb();
       }
     });
     this.subscribeNewMessage();
@@ -137,9 +138,10 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
     if(this.message.sender){
       this.webSocketService.onlineStatus$.subscribe((oStatus) => {
         const onlineStatus: OnlineStatus = oStatus;
+        console.log("OnlineStatus------", oStatus);
           if (onlineStatus && onlineStatus.userId) {
             if(this.onlineStatusList?.length){
-              this.onlineStatusList = this.onlineStatusList.filter(online=> online?.userId &&  online.userId != onlineStatus.userId);
+              this.onlineStatusList = this.onlineStatusList.filter(online=> online?.userId && online.userId != onlineStatus.userId);
             } else {
               this.onlineStatusList = [];
             }
@@ -149,6 +151,22 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
     }
   }
 
+  subscribeStatusWeb(){
+    if(this.chatRoomList?.length){
+      this.chatRoomList.forEach(room=>{
+        if(room.participants?.length){
+          room.participants.forEach(pts=>{
+            if(pts && pts.id && pts.id != this.currUser?.userId && !this.subscribedUsers.includes(pts.id)){
+              this.subscribedUsers.push(pts.id);
+              console.log("subscribedUsers----------", pts.id);
+              this.webSocketService.onlineStatus(pts.id);
+            }
+          })
+        }
+      })
+    }
+
+  }
   onlineStatus(chatRoom: ChatRoom):boolean{
     let onlineFlag: boolean = false;
     if(chatRoom && this.currUser?.userId){
@@ -232,21 +250,12 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
     }
   }
 
-  // subscribeToWebSocket() {
-  //   if(this.selectedRoom.id){
-  //     this.webSocketService.subscribeToMessages(this.selectedRoom.id).subscribe((message) => {
-  //       this.messages.push(message);
-  //     });
-  //   }
-  // }
-
   scrollToBottom(): void {
-    console.log("###############################", this.selectedRoom.id, this.selectedRoom);
     try {
       setTimeout(() => {
         const chatWindow = this.chatWindow.nativeElement;
         chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the exact bottom
-      }, 0); // Defer execution to ensure the DOM is fully updated
+      }, 0); 
     } catch (err) {
       console.error('Failed to scroll to bottom:', err);
     }
@@ -296,17 +305,6 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
             this.chatRoomList = this.chatRoomList.filter((room, index, self) => {
                 return index === self.findIndex((r) => r.id === room.id);
             });
-            ;
-            this.chatRoomList.forEach(room=>{
-              if(room.participants?.length){
-                room.participants.forEach(pts=>{
-                  if(pts && pts.id && pts.id != this.currUser?.userId && !this.subscribedUsers.includes(pts.id)){
-                    this.subscribedUsers.push(pts.id);
-                    this.webSocketService.onlineStatus(pts.id);
-                  }
-                })
-              }
-            })
           }
           this.totalRooms = resp.data.chatRoom.totalRow || this.totalRooms;
           this.currentPage = resp.data?.chatRoom?.pageCount ? resp.data.chatRoom.pageCount :0;

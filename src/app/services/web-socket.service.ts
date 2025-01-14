@@ -202,6 +202,7 @@ export class WebSocketService {
       this.stompClient.subscribe(`/topic/online-status/${userId}`, (message: Message) => {
         const messageBody = JSON.parse(message.body);
         this.onlineStatusSubject.next(messageBody);
+        console.log("OnlineStatus-##############onlineStatus######-----", messageBody);
       });
     }
   }
