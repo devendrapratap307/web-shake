@@ -176,25 +176,6 @@
     align-items: center;
 }
 
-.status-container {
-    margin-right: 10px; /* Space between the name and status indicator */
-}
-
-.status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: gray; /* Default state (offline) */
-}
-
-.status-indicator.online {
-    background-color: green; /* Online state */
-}
-
-.status-indicator.offline {
-    background-color: red; /* Offline state */
-}
-
 .button-group {
     display: flex;
     gap: 10px; /* Space between buttons */

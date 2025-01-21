@@ -25,12 +25,14 @@ export class AuthComponent {
     this.errorList = [];
     if(this.user && this.isEmailValid() && this.isPasswordValid() && this.isPasswordValid()){
       this.authService.addUser(this.user).subscribe(resp=>{
-        console.log("signup---------");
         if(resp && resp.status ==200){
           this.logging();
         } else {
           this.errorList.push(resp?.message);
         }
+      }, err=>{
+        this.errorList.push(err.error?.message);
+        this.loaderService.loader();
       });
     }
   }
@@ -40,18 +42,17 @@ export class AuthComponent {
     if(this.user && this.user.username && this.user.password && this.isPasswordValid()){
       this.loaderService.loader(true);
       this.authService.authenticateUser(this.user.username, this.user.password).subscribe(resp=>{
-        console.log("login---------", resp.status, this.errorList);
-        if(resp && resp.token){
-          this.authService.storeToken(resp.token);
+        if(resp && resp.status==200 && resp.data?.token){
+          this.authService.storeToken(resp.data.token);
           this.router.navigate(['/chat']); 
         } else {
           // this.router.navigate(['/auth']);
           this.errorList.push(resp?.message);
         }
-        console.log("login---------", resp.status, this.errorList);
         this.loaderService.loader();
-      }, err=>{
-        this.errorList.push(err?.message);
+      }
+      , err=>{
+        this.errorList.push(err.error?.message);
         this.loaderService.loader();
         // this.router.navigate(['/auth']);
       });

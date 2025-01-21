@@ -58,6 +58,39 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
   rowsPerPage = 20; 
   currentPage = 0; 
 
+  newRow: {item: number, description: string, amount: number, member: string} | any = {};
+
+  rows = [
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+    { item: 'Salt', description: 'Cooking salt', amount: '20.00', members: 'Ravi, Anand' },
+    { item: 'Sugar', description: 'Granulated sugar', amount: '50.00', members: 'Ravi, Preeti' },
+    { item: 'Milk', description: 'Full cream milk', amount: '30.00', members: 'Anand, Ravi' },
+];
+
+
   constructor(private webSocketService: WebSocketService, private chatApiService: ChatApiService, private authService: AuthService, private messageService: MessageService, private loaderService: LoaderService) {}
 
   ngOnInit() {
@@ -409,6 +442,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
   openSide(){
     this.sideFlag = true;
     this.editedFlag = false;
+    this.roomErrorList =[];
     if(this.selectedRoom.id){
       this.getChatRoomById(this.selectedRoom.id);
     }

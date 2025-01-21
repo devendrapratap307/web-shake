@@ -11,7 +11,6 @@
             </div>
         </div>
     </div>
-{{this.onlineStatusList | json}}##
     <!-- Chat Tab -->
     <div class="tab-content chat-tab" id="chatTab" style="display: block;">
         <div class="row chat-container">
@@ -33,12 +32,11 @@
                                 <div class="avatar">
                                     <i [class]="roomRow.iconClass || (roomRow.type =='GROUP' ? 'pi pi-users' : 'pi pi-user')" class="icon"></i>
                                 </div>
+                                <!-- <div class="status-container" *ngIf="roomRow?.type=='CHAT'">
+                                    <div class="status-indicator" [ngClass]="{'online': onlineStatus(roomRow), 'offline': !onlineStatus(roomRow)}"></div>
+                                </div> -->
                                 <span class="room-name">{{ roomRow.roomName }} {{roomRow.type=='SELF' ? ' (Me)' : ''}}</span>
                                 <p-badge *ngIf="notifyMsg(roomRow.id)" [value]="notifyMsg(roomRow.id)" severity="success" />
-                                <ng-container *ngIf="roomRow.type=='CHAT'" style="color: green;">
-                                    {{onlineStatus(roomRow) ? 'online' : 'offline'}}
-                                </ng-container>
-                                <!-- {{messagesForRoom(roomRow.id) | json}} -->
                             </td>
                             </tr>
                         </ng-template>
@@ -50,6 +48,9 @@
             <div class="chat-room">
                 <div class="chat-header" id="chatHeader">
                     <i [class]="selectedRoom.type=='GROUP' ? 'pi pi-users' : selectedRoom.type=='CHAT' ? 'pi pi-user' : selectedRoom.type=='SELF' ? 'pi pi-comments' : 'pi pi-info-circle'"></i> 
+                    <div class="status-container" *ngIf="selectedRoom?.type=='CHAT'">
+                        <div class="status-indicator" [ngClass]="{'online': onlineStatus(selectedRoom), 'offline': !onlineStatus(selectedRoom)}"></div>
+                    </div>
                      {{selectedRoom.roomName}}  {{selectedRoom.type=='SELF' ? ' (Me)' : ''}} 
                      <!-- {{selectedRoom.id ? (messagesForRoom(selectedRoom.id) | json) :''}} -->
                      <i *ngIf="selectedRoom && selectedRoom.type=='GROUP'" class="pi pi-external-link" (click)="openSide()"></i>
@@ -61,17 +62,79 @@
                             <div class="message-container" 
                                 [ngClass]="{'sent': msg.sender == message.sender, 'received': msg.sender != message.sender}">
                                 <div class="message-content">
-                                    <p *ngIf="selectedRoom?.type=='GROUP'" class="sender-name">{{msg?.senderName}}</p>
                                     <p>{{ msg.content }}</p>
                                 </div>
-                                <small class="message-timestamp">{{ msg.timeStamp | ownDate }}</small>
-
+                                <small class="message-timestamp"><ng-container *ngIf="selectedRoom?.type=='GROUP'" class="sender-name">{{msg?.senderName}}</ng-container>  {{ msg.timeStamp | ownDate }}</small>
+                                <span *ngIf="message.status === 'SENT'">✔</span>
+                                <span *ngIf="message.status === 'DELIVERED'">✔✔</span>
+                                <span *ngIf="message.status === 'SEEN'">👀</span>
                             </div>
                         </ng-container>
                     </div>
-                </div>
+                    <!-- <div class="scrollable-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr class="header-row">
+                                    <th>Members</th>
+                                    <th>Action</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="body-row" *ngFor="let rowData of rows; let idx = index">
+                                    <td class="body-cell">{{ rowData.members }}</td>
+                                    <td class="body-cell">Collect</td>
+                                    <td class="body-cell">{{ rowData.amount }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="scrollable-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr class="header-row">
+                                    <th>Item</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Members</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="body-row" *ngFor="let rowData of rows; let idx = index">
+                                    <td class="body-cell">{{ rowData.item }}</td>
+                                    <td class="body-cell">{{ rowData.description }}</td>
+                                    <td class="body-cell">{{ rowData.amount }}</td>
+                                    <td class="body-cell">{{ rowData.members }}</td>
+                                    <td class="body-cell">
+                                        <button class="send-btn">Send</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> -->
 
                 <!-- Input Area at the bottom -->
+                <!-- <div class="input-area">
+                    <table class="modern-table">
+                        <tbody>
+                            <tr class="input-row">
+                                <td><input type="text" [(ngModel)]="newRow.item" placeholder="Enter Item"></td>
+                                <td><input type="text" [(ngModel)]="newRow.description" placeholder="Enter Description"></td>
+                                <td><input type="number" [(ngModel)]="newRow.amount" placeholder="Enter Amount"></td>
+                                <td><input type="text" [(ngModel)]="newRow.members" placeholder="Enter Members"></td>
+                                <td>
+                                    <button class="add-btn">Add</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> -->
+                
+                
+                
+                
                 <div class="input-area">
                     <p *ngIf="selectedRoom.onlyAdmin && !roomAdminCheck()">Only admin can send messages</p>
                     <ng-container *ngIf="!selectedRoom.onlyAdmin || roomAdminCheck()">
@@ -117,6 +180,7 @@
                 <td>
                     <p-button *ngIf="adminCheck() || member.id == currUser?.userId" icon="pi pi-times" [rounded]="true" [text]="true" [raised]="true" severity="danger" (onClick)="removeMember(member.id)"/>
                     <p-button *ngIf="adminCheck()" [icon]="member.adminFlag ? 'pi pi-times' :'pi pi-check'" [label]="'Admin'" [rounded]="true" [text]="true" [raised]="true" [severity]="member.adminFlag ? 'danger' : 'p-button-success'" (onClick)="adminMark(member.id, !member.adminFlag)"/>
+                </td>
             </tr>
         </ng-template>
     </p-table>

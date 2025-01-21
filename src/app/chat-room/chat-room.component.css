@@ -353,4 +353,79 @@
         z-index: 9999;
       }
       
+
+      /* Scrollable container */
+  .scrollable-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Table styles */
+  .modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background-color: #fff;
+  }
+
+  /* Fixed header styling */
+  .modern-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #4CAF50;
+    color: white;
+    text-align: left;
+    padding: 10px;
+    border-bottom: 2px solid #ddd;
+    z-index: 10;
+  }
+
+  /* Body rows */
+  .modern-table tbody .body-row {
+    background-color: #f9f9f9;
+    transition: background 0.3s ease;
+  }
+
+  .modern-table tbody .body-row:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Cells */
+  .modern-table tbody .body-cell {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Buttons */
+  .modern-table .add-btn,
+  .modern-table .send-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .modern-table .add-btn:hover,
+  .modern-table .send-btn:hover {
+    background-color: #45A049;
+  }
+
+  /* Input row */
+  .modern-table .input-row input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+    
       
