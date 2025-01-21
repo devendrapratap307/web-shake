@@ -480,6 +480,10 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
     }
   }
 
+  roomBlock(){
+    this.editedFlag = true;
+  }
+
   onEmojiClick(event: any) {
     if(this.selectedRoom.id && event){
       if(!this.message.content){

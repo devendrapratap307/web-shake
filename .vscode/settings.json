@@ -1,0 +1,5 @@
+{
+    "conventionalCommits.scopes": [
+        "commented & initiate a block/unblock"
+    ]
+}

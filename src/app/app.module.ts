@@ -26,6 +26,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
 import { CheckboxModule } from 'primeng/checkbox';
 import { BadgeModule } from 'primeng/badge';
+import { ToggleButtonModule } from 'primeng/togglebutton';
 import { OwnDatePipe } from './own-date.pipe';
 import { EmojiPickerWrapperComponent } from './emoji-picker-wrapper/emoji-picker-wrapper.component';
 @NgModule({
@@ -58,7 +59,8 @@ import { EmojiPickerWrapperComponent } from './emoji-picker-wrapper/emoji-picker
     ProgressSpinnerModule,
     TagModule,
     CheckboxModule,
-    BadgeModule
+    BadgeModule,
+    ToggleButtonModule
   ],
   providers: [
     {

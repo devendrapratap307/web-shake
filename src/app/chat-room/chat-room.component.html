@@ -53,7 +53,7 @@
                     </div>
                      {{selectedRoom.roomName}}  {{selectedRoom.type=='SELF' ? ' (Me)' : ''}} 
                      <!-- {{selectedRoom.id ? (messagesForRoom(selectedRoom.id) | json) :''}} -->
-                     <i *ngIf="selectedRoom && selectedRoom.type=='GROUP'" class="pi pi-external-link" (click)="openSide()"></i>
+                     <i *ngIf="selectedRoom && (selectedRoom.type=='GROUP' || selectedRoom.type=='CHAT')" class="pi pi-external-link" (click)="openSide()"></i>
                 </div>
 
                 <div class="chat-area" id="chatArea">
@@ -163,11 +163,18 @@
 </div>
 <p-sidebar [(visible)]="sideFlag" position="right" [modal]="true" [style]="{ width: '50%', maxWidth: '100%', height: '100%' }" [dismissible]="false" appendTo="body">
     <h4>{{editChatRoom.roomName}}</h4>
-    <p-checkbox *ngIf="adminCheck()" [(ngModel)]="editChatRoom.onlyAdmin" [binary]="true" label="Only Admin" inputId="binary" (ngModelChange)="editedFlag=true"/>
+    <!-- <p-toggleButton *ngIf="editChatRoom?.type=='CHAT'"
+    onLabel="Blocked" 
+    offLabel="Unblocked" 
+    [onIcon]="'pi pi-lock'" 
+    offIcon="pi pi-lock-open" 
+    [styleClass]="'w-6rem'"
+    ariaLabel="Do you confirm" (onChange)="roomBlock()"/> -->
+    <p-checkbox *ngIf="adminCheck() && editChatRoom?.type=='GROUP'" [(ngModel)]="editChatRoom.onlyAdmin" [binary]="true" label="Only Admin" inputId="binary" (ngModelChange)="editedFlag=true"/>
     <ng-container *ngIf="roomErrorList?.length">
         <li *ngFor="let er of roomErrorList" class="error-message">{{er}}</li>
     </ng-container>
-    <p-table [value]="editChatRoom.participants" scrollHeight="300px"  [tableStyle]="{ 'min-width': '30rem','max-width':'100rem'}" [scrollable]="true" [responsive]="true">
+    <p-table *ngIf="editChatRoom?.type=='GROUP'" [value]="editChatRoom.participants" scrollHeight="300px"  [tableStyle]="{ 'min-width': '30rem','max-width':'100rem'}" [scrollable]="true" [responsive]="true">
         <ng-template pTemplate="header">
             <tr>
                 <th>Member</th>
@@ -186,12 +193,12 @@
     </p-table>
     <div class="button-bottom" *ngIf="editedFlag">
         <p-button [disabled]="!editedFlag"
-        label="Save Changes" 
-        icon="pi pi-save" 
-        class="p-button-success"
-        size="small" 
-        (onClick)="updateChatRoom(editChatRoom)">
-    </p-button>
+            label="Save" 
+            icon="pi pi-save" 
+            class="p-button-success"
+            size="small" 
+            (onClick)="updateChatRoom(editChatRoom)">
+        </p-button>
     </div>
 </p-sidebar>
 
