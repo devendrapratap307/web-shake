@@ -29,6 +29,7 @@ import { BadgeModule } from 'primeng/badge';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { OwnDatePipe } from './own-date.pipe';
 import { EmojiPickerWrapperComponent } from './emoji-picker-wrapper/emoji-picker-wrapper.component';
+import { InputSwitchModule } from 'primeng/inputswitch';
 @NgModule({
   declarations: [
     AppComponent,
@@ -60,7 +61,8 @@ import { EmojiPickerWrapperComponent } from './emoji-picker-wrapper/emoji-picker
     TagModule,
     CheckboxModule,
     BadgeModule,
-    ToggleButtonModule
+    ToggleButtonModule,
+    InputSwitchModule
   ],
   providers: [
     {

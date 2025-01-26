@@ -136,12 +136,16 @@
                 
                 
                 <div class="input-area">
-                    <p *ngIf="selectedRoom.onlyAdmin && !roomAdminCheck()">Only admin can send messages</p>
-                    <ng-container *ngIf="!selectedRoom.onlyAdmin || roomAdminCheck()">
-                        <input type="text" id="messageInput" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()" [disabled]="!selectedRoom || !selectedRoom.id"/>
-                        <app-emoji-picker-wrapper (emojiSelect)="onEmojiClick($event)"></app-emoji-picker-wrapper>
-                        <button [disabled]="!selectedRoom || !selectedRoom.id || !message.content || !message.sender" (click)="sendMessage()">Send</button>
+                    <p *ngIf="selectedRoom?.status=='BLOCK'" class="error-message"> Blocked...</p>
+                    <ng-container *ngIf="selectedRoom?.status !=='BLOCK'">
+                        <p *ngIf="selectedRoom.onlyAdmin && !roomAdminCheck()">Only admin can send messages</p>
+                        <ng-container *ngIf="!selectedRoom.onlyAdmin || roomAdminCheck()">
+                            <input type="text" id="messageInput" placeholder="Type a message..." [(ngModel)]="message.content" (keydown.enter)="sendMessage()" [disabled]="!selectedRoom || !selectedRoom.id"/>
+                            <app-emoji-picker-wrapper (emojiSelect)="onEmojiClick($event)"></app-emoji-picker-wrapper>
+                            <button [disabled]="!selectedRoom || !selectedRoom.id || !message.content || !message.sender" (click)="sendMessage()">Send</button>
+                        </ng-container>
                     </ng-container>
+                
                 </div>
             </div>
         </div>
@@ -170,6 +174,15 @@
     offIcon="pi pi-lock-open" 
     [styleClass]="'w-6rem'"
     ariaLabel="Do you confirm" (onChange)="roomBlock()"/> -->
+    <div class="row align-items-center" *ngIf="editChatRoom?.type=='CHAT'">
+        <ng-container *ngFor="let member of editChatRoom.participants">
+            <div class="col-6 d-flex align-items-center" *ngIf="member.id == currUser?.userId">
+                <label for="switch2" class="form-label me-2">Block</label>
+                <p-inputSwitch inputId="switch2" [(ngModel)]="member.blockFlag" (onChange)="blockFlagChange()"></p-inputSwitch>
+            </div>
+        </ng-container>
+    </div>
+    
     <p-checkbox *ngIf="adminCheck() && editChatRoom?.type=='GROUP'" [(ngModel)]="editChatRoom.onlyAdmin" [binary]="true" label="Only Admin" inputId="binary" (ngModelChange)="editedFlag=true"/>
     <ng-container *ngIf="roomErrorList?.length">
         <li *ngFor="let er of roomErrorList" class="error-message">{{er}}</li>

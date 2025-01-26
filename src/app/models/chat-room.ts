@@ -14,6 +14,9 @@ export class ChatRoom extends Audit {
 export class Participant {
     id?: string;
     adminFlag: boolean = false;
+    blockFlag: boolean = false;
+
+    label:string = '';
 
 
 }

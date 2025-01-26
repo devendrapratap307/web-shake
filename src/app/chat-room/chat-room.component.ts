@@ -9,7 +9,7 @@ import { OnlineStatus, SearchReq } from '../models/user';
 import { ChatRoom } from '../models/chat-room';
 import { Subscription } from 'rxjs';
 import { LoaderService } from '../services/loader.service';
-import { ROOM_TYPE_CHAT } from '../data';
+import { ROOM_STATUS_ACTIVE, ROOM_STATUS_BLOCK, ROOM_STATUS_DELETE, ROOM_TYPE_CHAT, ROOM_TYPE_GROUP } from '../data';
 
 @Component({
   selector: 'app-chat-room',
@@ -322,6 +322,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
       this.selectedRow = null;
     }
     this.selectedRoom = new ChatRoom();
+    this.messages = [];
     console.log("chatRoomType====", chatRoomType);
     const search: SearchReq = new SearchReq();
     search.limit= this.rowsPerPage;
@@ -367,11 +368,22 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
 
   updateChatRoom(chatRoom: ChatRoom){
     if(chatRoom && this.editedFlag && this.validateRoom()){
+      if(this.editChatRoom.type==ROOM_TYPE_CHAT){
+        if(this.editChatRoom?.participants?.length){
+          if(this.editChatRoom.participants.some(pts => pts && pts.id && pts?.blockFlag)){
+            this.editChatRoom.status=ROOM_STATUS_BLOCK;
+          } else {
+            this.editChatRoom.status= ROOM_STATUS_ACTIVE;
+          }
+        }
+      }
       this.loaderService.loader(true);
-      this.editChatRoom = new ChatRoom();
       this.chatApiService.updateChatRoom(chatRoom).subscribe(resp=>{
         if(resp && resp.status==200 && resp.data?.chatRoom){
           // this.editChatRoom = resp.data?.chatRoom;
+          const roomName: string = this.selectedRoom?.roomName || '';
+          this.selectedRoom = resp.data?.chatRoom;
+          this.selectedRoom.roomName = roomName;
           this.editedFlag = false;
           this.sideFlag = false;
         }
@@ -382,18 +394,22 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
 
   validateRoom(): boolean{
     this.roomErrorList =[];
-    if(!this.editChatRoom.roomName){
-      this.roomErrorList.push("Group Name required.")
-    }
-    if(this.editChatRoom && this.editChatRoom.participants?.length){
-      if(!this.editChatRoom.participants.some(pts => pts && pts.adminFlag)){
-        this.roomErrorList.push("At least a memeber should be admin.");
+    if(this.editChatRoom && this.editChatRoom.status !== ROOM_STATUS_DELETE){
+      if(this.editChatRoom.type==ROOM_TYPE_GROUP){
+        if(!this.editChatRoom.roomName){
+          this.roomErrorList.push("Group Name required.")
+        }
+        if(this.editChatRoom && this.editChatRoom.participants?.length){
+          if(!this.editChatRoom.participants.some(pts => pts && pts.adminFlag)){
+            this.roomErrorList.push("At least a memeber should be admin.");
+          }
+          if(!this.editChatRoom.participants.some(pts => pts && pts.id && pts.id == this.currUser?.userId)){
+            this.roomErrorList.push("Not able to save.");
+          }
+        } else {
+          this.roomErrorList.push("At least a memeber required.");
+        }
       }
-      if(!this.editChatRoom.participants.some(pts => pts && pts.id && pts.id == this.currUser?.userId)){
-        this.roomErrorList.push("Not able to save.");
-      }
-    } else {
-      this.roomErrorList.push("At least a memeber required.");
     }
     return !this.roomErrorList?.length;
   }
@@ -480,7 +496,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewInit{
     }
   }
 
-  roomBlock(){
+  blockFlagChange(){
     this.editedFlag = true;
   }
 

@@ -15,3 +15,8 @@ export const ROOM_TYPE_SELF = 'SELF';
 export const MESSAGE_TYPE_JOIN = 'JOIN';
 export const MESSAGE_TYPE_LEAVE = 'LEAVE';
 export const MESSAGE_TYPE_CHAT = 'CHAT';
+export const MESSAGE_TYPE_OUTLAY = 'OUTLAY';
+
+export const SPLIT_TYPE_EQUAL = 'EQUAL';
+export const SPLIT_TYPE_PERCENTAGE = 'PERCENT';
+export const SPLIT_TYPE_CUSTOM = 'CUSTOM';
