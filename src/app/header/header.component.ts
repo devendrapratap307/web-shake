@@ -8,11 +8,13 @@ import { PENDING, ROOM_STATUS_ACTIVE, ROOM_TYPE_GROUP } from '../data';
 import { ChatApiService } from '../services/chat-api.service';
 import { ChatRoom, Participant } from '../models/chat-room';
 import { LoaderService } from '../services/loader.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
+  providers: [MessageService]
 })
 export class HeaderComponent {
   currUser: any;
@@ -32,7 +34,7 @@ export class HeaderComponent {
   autoUserList: User[] = [];
   @Input() isOnline: boolean= false;
 
-  constructor(private webSocketService: WebSocketService, private authService: AuthService, private chatApiService: ChatApiService, private router: Router, private loaderService: LoaderService){
+  constructor(private webSocketService: WebSocketService, private authService: AuthService, private chatApiService: ChatApiService, private router: Router, private loaderService: LoaderService, private messageService: MessageService){
     this.currUser = this.authService.getUserDetails();
   }
   
@@ -80,6 +82,7 @@ export class HeaderComponent {
         } else  {
           this.loaderService.loader(false);
         }
+        this.messageAlert(resp?.status ==200 ? 'success' : 'error', resp?.status ==200 ? 'Success': 'Failed', resp.message);
       });
     }
   }
@@ -113,7 +116,7 @@ export class HeaderComponent {
         } else{
           this.loaderService.loader(false);
         }
-
+        this.messageAlert(resp?.status ==200 ? 'success' : 'error', resp?.status ==200 ? 'Success': 'Failed', resp.message);
       });
     }
   }
@@ -180,5 +183,9 @@ export class HeaderComponent {
         this.loaderService.loader(false);
       });
     }
+  }
+
+  messageAlert(severityData: string = 'success', summaryData: string = 'Success', detailData:string) {
+    this.messageService.add({ severity: severityData, summary: summaryData, detail: detailData });
   }
 }
